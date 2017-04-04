@@ -1,0 +1,72 @@
+from cm.htmllib import base
+from quixote.util import StaticDirectory
+from cm.config import ATTACHMENT_DIR
+from cm.html.attachment.attachmentlib import AttachmentList, AttachmentDetails, \
+CreateForm, AttachToForm, DetachForm, DeleteForm, ModifyForm, ReplaceForm
+from cm import error
+
+
+def _q_index [html] (request):
+    browse(request)
+    
+def browse [html] (request):
+    base.header(request, title=_('Browse Attachments'))
+    AttachmentList(request)
+    base.footer(request)
+
+
+download = StaticDirectory(ATTACHMENT_DIR, use_cache=0)
+
+def upload [html] (request):
+    base.header(request, title=_('Upload An Attachment'))
+    CreateForm().handle(request)
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return AttachmentUI(name)
+
+def attach_to [html] (request):
+    base.header(request, title=_('Attach An Attachment'))
+    AttachToForm().handle(request)
+    base.footer(request)
+
+
+class AttachmentUI:
+    _q_exports = ['details', 'replace', 'modify', 'delete', 'detach']    
+
+    def __init__(self, name):
+        try:
+            self._id = int(name)
+        except ValueError:
+            raise error.TraversalError           
+
+    def _q_index [html] (self, request):
+        self.details(request)
+        
+    def details [html] (self, request):
+        base.header(request, title=_('Attachment Details'))
+        AttachmentDetails(request, self._id)
+        base.footer(request)
+
+    def modify [html] (self, request):
+        #Change the description text
+        base.header(request, title=_('Modify An Attachment'))
+        ModifyForm(self._id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete An Attachment'))
+        DeleteForm(self._id).handle(request)        
+        base.footer(request)
+
+    def replace [html] (self, request):
+        #Allow uploading a new file
+        base.header(request, title=_('Replace An Attachment'))
+        ReplaceForm(self._id).handle(request)
+        base.footer(request)
+
+    def detach [html] (self, request):
+        base.header(request, title=_('Detach Attachment'))
+        DetachForm(self._id).handle(request)
+        base.footer(request)
+

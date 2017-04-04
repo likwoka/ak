@@ -1,0 +1,73 @@
+from cm.htmllib import base, AKForm
+from cm.model.expense import Expense
+from cm import datetime
+
+
+def get_expense(expense_id):
+    return base.get_instance(Expense().get, {'expense_id':expense_id})
+
+
+class ExpenseForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='expense_form')
+        self.add_widget('ak_string', 'expense_id', title=_('Expense Id'))
+        self.add_widget('ak_string', 'case_id', title=_('Case Id'), 
+                        readonly=True)
+        self.add_widget('ak_string', 'description', title=_('Description'), 
+                        required=True)
+        self.add_widget('ak_float', 'amount', title=_('Amount ($)'))
+
+
+class ExpenseCreateForm(ExpenseForm):
+    def __init__(self, case_id):
+        self.case_id = case_id
+        ExpenseForm.__init__(self)
+        self.set_title(_('Add An Expense'))
+        self.remove_widget('expense_id')
+        self.set_widget('case_id', value=case_id)
+        self.add_submit_button('run', _('Add'))
+
+    def action(self, request, submit, form_data):
+        form_data['expense_id'] = Expense().get_id()
+        form_data['owner'] = request.session.user
+        form_data['datetime'] = datetime.now()
+        try:
+            Expense().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('../?tab=expense')
+        
+
+class ExpenseModifyForm(ExpenseForm):
+    def __init__(self, expense_id):
+        self.expense_id = expense_id
+        data = get_expense(expense_id) 
+        ExpenseForm.__init__(self)
+        self.set_title(_('Modify Expense'))
+        self.set_widgets_value(data)
+        self.set_widget('expense_id', value=expense_id, readonly=True)
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['expense_id'] = self.expense_id
+        try:
+            Expense().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('../../?tab=expense')
+    
+    
+class ExpenseDeleteForm(AKForm):
+    def __init__(self, expense_id):
+        self.expense_id = expense_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Expense'))
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), '../../?tab=expense')
+
+    def action(self, request, submit, form_data):
+        Expense().delete({'expense_id':self.expense_id})
+        return request.redirect('../../?tab=expense')
+
+

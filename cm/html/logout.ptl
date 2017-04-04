@@ -1,0 +1,22 @@
+from cm import config, user
+from cm.htmllib import base
+from cm.html.login import LoginForm
+
+
+def logout [html] (request):
+    user.User().logout(request)
+    form_name = 'loginform'
+    base.header(request, title=_('Logout'), panels=False, 
+                focus_form=form_name)
+    f = LoginForm(form_name)
+    f.set_message(_('You have successfully logged out.'))
+    '''
+    <center>
+    <h2>AKONE Case Management System (alpha)</h2>
+    <p>%s</p>
+    <address>* This site requires cookie.</address>
+    </center>
+    ''' % f.render(request, config.LOGIN_URL)
+    base.footer(request, panels=False)
+
+

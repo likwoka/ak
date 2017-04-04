@@ -1,0 +1,191 @@
+from cm.htmllib import AKForm
+from cm.model.incident import IncidentManager, Incident, IncidentStatus
+from cm.model.store import StoreManager
+from cm import datetime, error
+from cm.config import APP_ROOT
+from cm.html.incident.incidentlib2 import get_incident, IncidentList, \
+IncidentDetails 
+
+
+class IncidentForm(AKForm):
+    def __init__(self):
+        FORM_NAME = 'incident_form'
+        AKForm.__init__(self, name=FORM_NAME)
+        self.set_title(_('Incident Details'))
+        self.add_widget('ak_string', 'incident_id', title=_('Incident Id'))
+        self.add_widget('ak_text', 'description', title=_('Description'), 
+                        required=True)
+
+        # Link won't work here; it needs request... we basically always
+        # show the link here.
+        store_hint = """<a href="%sstore/create" title="%s">%s</a>""" % \
+                     (APP_ROOT, _('Create Store'), _('Create Store'))
+
+        store_val = []
+        store_desc = []
+        stores = StoreManager().get({'sort_by':'store_id'})
+        for s in stores:
+            store_val.append(s.store_id)
+            store_desc.append('%s - %s' % (s.store_id, s.location))
+        self.add_widget('ak_single_select', 'store_id', title=_('Store'),
+                        hint=store_hint, 
+                        allowed_values=store_val,
+                        descriptions=store_desc)
+        
+        self.add_widget('ak_string', 'who', title=_('Who'))
+        self.add_widget('ak_date', 'date', title=_('Incident Date'), 
+                        form_name=FORM_NAME)
+        self.add_widget('ak_time', 'time', title=_('Incident Time'))
+        self.add_widget('ak_text', 'narrative', title=_('Narrative'))
+        self.add_widget('ak_text', 'outcome', title=_('Outcome'))
+        self.add_widget('ak_text', 'service_request', 
+                        title=_('Service Request'))
+
+        status = IncidentStatus().descs()
+        self.add_widget('ak_single_select', 'status', title=_('Status'),
+                        allowed_values=status,
+                        descriptions=status)        
+
+
+class IncidentCreateForm(IncidentForm):
+    def __init__(self):
+        IncidentForm.__init__(self)
+        self.set_title(_('Create Incident'))
+        self.add_widget('hidden', 'case_id')
+        self.remove_widget('incident_id')
+        self.remove_widget('status')
+        self.add_submit_button('run', _('Create'))
+
+    def action(self, request, submit, form_data):
+        i = Incident()
+        _id = i.get_id()
+        form_data['incident_id'] = _id
+        form_data['owner'] = request.session.user
+        form_data['datetime'] = datetime.now()
+        form_data['status'] = IncidentStatus().descs()[0] #open
+        try:
+            i.new(form_data)
+        except AssertionError:
+            pass
+
+        if form_data.get('case_id') is not None:
+            kw2 = {}
+            kw2['incident_id'] = _id
+            kw2['case_id'] = form_data['case_id']
+            try:
+                i.attach_to_case(kw2)
+            except AssertionError:
+                pass
+                
+        return request.redirect('%s/' % _id)
+
+
+class IncidentModifyForm(IncidentForm):
+    def __init__(self, incident_id):
+        self._id = incident_id
+        data = get_incident(incident_id)
+        IncidentForm.__init__(self)
+        self.set_widgets_value(data)
+        self.set_widget('incident_id', readonly=True)
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['incident_id'] = self._id
+        try:
+            Incident().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+
+
+class IncidentDeleteForm(AKForm):
+    def __init__(self, incident_id):
+        self.incident_id = incident_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Incident %s') % incident_id)
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            Incident().delete({'incident_id':self.incident_id})
+        except AssertionError:
+            pass
+        return request.redirect('../browse')
+
+
+class IncidentDetachForm(AKForm):
+    def __init__(self, incident_id):
+        self.incident_id = incident_id
+        AKForm.__init__(self)
+        self.set_title(_('Detach Incident'))
+        self.add_widget('checkbox', 'delete', 
+                        title=_('Delete the incident'))
+        self.add_widget('hidden', 'case_id')
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Detach'))
+
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if form_data.get('case_id') is None:
+            raise _('Nothing to detach from.')
+        return form_data
+
+    def action(self, request, submit, form_data):
+        i = Incident()
+        form_data['incident_id'] = self.incident_id
+
+        try:
+            i.detach_from_case(form_data)
+        except AssertionError:
+            pass
+        addr = '%scase/%s/?tab=incident' % (APP_ROOT, form_data['case_id'])
+
+        if form_data.get('delete'):
+            try:
+                i.delete({'incident_id':self.incident_id})
+            except AssertionError:
+                pass
+
+        return request.redirect(addr)
+
+
+class IncidentAttachToForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self)
+        self.set_title(_('Attach An Incident'))
+        self.add_widget('hidden', 'case_id')
+       
+        a_desc = []
+        a_val = []
+        as = IncidentManager().get({'sort_by':'incident_id'})
+        for a in as:
+            a_val.append(a.incident_id)
+            a_desc.append('%s - %s' % (a.incident_id, a.description))
+        if len(a_val) > 0:
+            self.add_widget('ak_single_select', 'incident_id', 
+                            title='Incident',
+                            allowed_values=a_val,
+                            descriptions=a_desc,
+                            required=True)
+            self.add_submit_button('run', _('Attach'))
+        else: 
+            self.set_message(_('No incident found.'))
+    
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if form_data.get('case_id') is None:
+            raise error.NotEnoughDataError(_('Nothing to attach to.'))
+        return form_data
+    
+    def action(self, request, submit, form_data):
+        a = Incident()
+        try:
+            a.attach_to_case(form_data)
+        except AssertionError:
+            pass
+        addr = '%scase/%s/?tab=incident' % (APP_ROOT, form_data['case_id'])
+        return request.redirect(addr)
+
+

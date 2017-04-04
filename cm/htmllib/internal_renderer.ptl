@@ -1,0 +1,172 @@
+from quixote.publish import get_request
+
+
+def _wrap(text, width):
+    """
+    A word-wrap function that preserves existing line breaks
+    and most spaces in the text. Expects that existing line
+    breaks are posix newlines (\n).
+    """
+    return reduce(lambda line, word, width=width: '%s%s%s' %
+                  (line,
+                   ' \n'[(len(line[line.rfind('\n')+1:])
+                         + len(word.split('\n',1)[0]) >= width)],
+                   word),
+                  text.split(' '))
+
+
+def Pre(text):
+    '''Returns a <pre>text</pre>.'''
+    if text is None:
+        return htmltext('&nbsp;') # means a space in html.
+    return htmltext('<pre>%s</pre>') % _wrap(text, 80)
+
+
+# OBSOLETED? 2003 08 15
+#def CLink(text, url, title=None, klass='link', target=None):
+#    '''Classic Link.  Returns a htmltext of 
+#    <a href="url" title="title" class="klass" target="target">text</a>.
+#    '''
+#    if text is None:
+#        return htmltext('&nbsp;')
+#    tag = '<a href="%s" class="%s"' % (url, klass)
+#    if target:
+#        tag += ' target="%s"' % target
+#    if title:
+#        tag += ' title="%s"' % title
+#    tag += '>%s</a>' % str(text)
+#    return htmltext(tag)
+
+
+def Link(text, url, title='', klass='link', target='', 
+         show=True):
+    '''Returns a htmltext of 
+    <a href="url" title="title" class="klass" target="target">text</a>
+    if user's role allow access to that link.  Otherwise, either
+    don't show anything (show=False) or show the link as text (show=True).
+    '''
+    role = get_request().session.role
+    base = get_request().get_path()
+    if role.deny(url, base): 
+        if show:
+            return htmltext('<span class="no_access">%s</span>' % text)
+        return htmltext('&nbsp;')
+    else:
+        if text is None:
+            return htmltext('&nbsp;')
+        if target:
+            target = ' target="%s"' % target
+        if title:
+            title = ' title="%s"' % title
+        tag = '<a href="%s" class="%s" %s %s>%s</a>' % ( \
+              url, klass, target, title, str(text))
+        return htmltext(tag)
+
+
+class BaseRenderer:
+    """The BaseRenderer provides most rendering 'infrastructure'
+    to other (subclass) Renderer objects.  The 'infrastructure'
+    includes link (add/remove, set, render), message (set, render),
+    title (set, render).  Subclasses simply called the render methods
+    when it is suitable.
+    """
+    COLSPAN = None
+    
+    def __init__(self):
+        assert self.__class__ is not BaseRenderer, "abstract class"
+        self.ak_link_order = []
+        self.ak_title = None
+        self.ak_message = None
+    
+    def add_link(self, text, url, title=None, show=True):
+        self.ak_link_order.append((text, url, title, show))
+    
+    def set_title(self, *titles):
+        self.ak_title = titles
+
+    def set_message(self, message):
+        self.ak_message = message
+
+    def _render_links [html] (self, request):
+        links = self.ak_link_order
+        """
+        <tr><td colspan="%s">&nbsp;</td></tr>
+        <tr><td colspan="%s"><center>%s</center></td></tr>
+        """ % (self.COLSPAN, self.COLSPAN, 
+            ' | '.join([Link(l[0], l[1], title=l[2], show=l[3])
+                        for l in links]))
+
+    def _render_title [html] (self, request):
+        if self.ak_title:
+            '<tr><td colspan="%s" class="title"><center>' % self.COLSPAN
+            '<br/>'.join(self.ak_title)
+            '</center></td></tr>'
+
+    def _render_message [html] (self, request):
+        if self.ak_message:
+            """
+            <tr><td colspan="%s">&nbsp;</td></tr>
+            <tr><td colspan="%s" 
+            class="mom_message"><center>%s</center></td></tr>
+            """ % (self.COLSPAN, self.COLSPAN, self.ak_message)
+
+
+class Grid(BaseRenderer):
+    """I am usually used when presenting data
+    from a row returned from a database query.
+    """
+    COLSPAN = 2
+
+    def __init__(self):
+        BaseRenderer.__init__(self)
+        self.items = {}
+        self.item_order = []
+
+    def render [html] (self, request):
+        '<p>'
+        '<table cellspacing="0" cellpadding="4" class="grid">'
+        self._render_title(request)
+        self._render_message(request)
+        '<tr><td colspan="%s">&nbsp;</td></tr>' % self.COLSPAN
+        self._render_items(request)
+        self._render_links(request)
+        '</table>'
+        '</p>'
+    
+    def _render_items [html] (self, request):
+        d = self.item_order
+        for k in d:
+            v = self.items[k]
+            if v is None: 
+                v = '&nbsp;' # this means a space in html
+            """<tr><td class="grid_key">%s:</td>
+            <td class="grid_value">%s</td></tr>""" % (k, v)
+        
+    def add_item(self, name, value):
+        if name in self.items.keys():
+            raise ValueError, "Form/List/Grid already has key '%s'" % name
+        else:
+            self.items[name] = value
+            self.item_order.append(name)
+        
+
+class Message(BaseRenderer):
+    COLSPAN = 1
+    
+    def render [html] (self, request):
+        '<p>'
+        '<table cellspacing="0" cellpadding="4" class="message">'
+        self._render_title(request)
+        self._render_message(request)
+        self._render_links(request)
+        '</table>'
+        '</p>'
+
+    def _render_message [html] (self, request):
+        if self.ak_message:
+            """
+            <tr><td colspan="%s">&nbsp;</td></tr>
+            <tr><td colspan="%s"><center>%s</center></td></tr>
+            """ % (self.COLSPAN, self.COLSPAN, self.ak_message)
+
+

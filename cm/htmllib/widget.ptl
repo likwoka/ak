@@ -1,0 +1,232 @@
+from quixote.form.widget import StringWidget, CheckboxWidget
+from quixote.html import html_quote, htmltag, htmltext
+from cm import datetime
+
+#This import allow us to just import cm.html.lib.widget for all widgets
+from quixote.form.widget import Widget, FileWidget, \
+     PasswordWidget, TextWidget, RadiobuttonsWidget, \
+     SingleSelectWidget, SelectWidget, OptionSelectWidget, \
+     MultipleSelectWidget, ListWidget, SubmitButtonWidget, HiddenWidget, \
+     FloatWidget, IntWidget, FormValueError
+
+
+def _parse(self, request):
+    Parent = self.parent
+    val = Parent.parse(self, request)
+    if (val is None) and self.required:
+        raise FormValueError, 'required'
+    return self.value
+
+
+def _render_readonly_tag(name, value):
+    hidden = htmltag('input', xml_end=1,
+                     type='hidden',
+                     name=name,
+                     value=value)
+    return htmltext('%s%s' % (value, hidden))
+
+
+class AKStringWidget(StringWidget):
+    """I am a string input box which allows "readonly" value."""
+    widget_type = "ak_string"
+    parent = StringWidget
+    parse = _parse
+    
+    def __init__(self, name, value=None, size=None, 
+                 maxlength=None, readonly=False, required=False):
+        StringWidget.__init__(self, name, value=value, 
+                              size=size, maxlength=maxlength)
+        self.readonly = readonly
+        self.required = required
+
+    def render(self, request):
+        if self.readonly:
+            return _render_readonly_tag(self.name, self.value)
+        else:
+            return StringWidget.render(self, request)
+
+
+
+class AKPasswordWidget(PasswordWidget):
+    widget_type = 'ak_password'
+    parent = PasswordWidget
+    parse = _parse
+
+    def __init__(self, name, value=None, size=None, 
+                 maxlength=None, required=False):
+        self.required = required
+        PasswordWidget.__init__ (self, name, value=value,
+                                 size=size, maxlength=maxlength)
+
+
+                                     
+class AKIntWidget(IntWidget):
+    widget_type = 'ak_int'
+    parent = IntWidget
+    parse = _parse
+    
+    def __init__(self, name, value=None, size=None, 
+                 maxlength=None, readonly=False, required=False):
+        IntWidget.__init__(self, name, value=value,
+                           size=size, maxlength=maxlength)
+        self.readonly = readonly
+        self.required = required
+
+    def render(self, request):
+        if self.readonly:
+            return _render_readonly_tag(self.name, self.value)
+        else:
+            return IntWidget.render(self, request)
+
+
+
+class AKFloatWidget(FloatWidget):
+    widget_type = 'ak_float'
+    parent = FloatWidget
+    parse = _parse
+    
+    def __init__(self, name, value=None, size=None, 
+                 maxlength=None, readonly=False, required=False):
+        FloatWidget.__init__(self, name, value=value,
+                           size=size, maxlength=maxlength)
+        self.readonly = readonly
+        self.required= required
+
+    def render(self, request):
+        if self.readonly:
+            return _render_readonly_tag(self.name, self.value)
+        else:
+            return FloatWidget.render(self, request)
+
+    
+class AKCheckboxWidget(CheckboxWidget):
+    """I am a checkbox input box which display 
+    the title is display after the checkbox.
+    """
+    # Note: the display mechanism is in cm.htmllib.form, not
+    # in here, that's why you won't see any code here...
+    # however, by subclassing CheckboxWidget we allow
+    # 2 ways of displaying: title before checkbox (checkbox) or
+    # title after checkbox (ak_checkbox)
+    widget_type = "ak_checkbox"
+
+
+class AKTextWidget(TextWidget):
+    widget_type = 'ak_text'
+    parent = TextWidget
+    parse = _parse
+    
+    def __init__(self, name, value=None,
+                 cols=45, rows=10, wrap=None):
+        TextWidget.__init__(self, name=name, value=value, 
+                            cols=cols, rows=rows, wrap=wrap)
+
+
+class AKFileWidget(FileWidget):
+    widget_type = 'ak_file'
+    parent = FileWidget
+    parse = _parse
+
+
+class AKRadiobuttonsWidget(RadiobuttonsWidget):
+    widget_type = 'ak_radiobuttons'
+    parent = RadiobuttonsWidget
+    parse = _parse
+
+
+def _datetime_parse(self, request):
+    value = AKStringWidget.parse(self, request)
+    if value is not None:
+        try:
+            self.value = value
+            datetime.validate(value, self.format)
+        except ValueError:
+            raise FormValueError, 'wrong format'
+    return self.value
+
+
+class AKDateWidget(AKStringWidget):
+    widget_type = "ak_date"
+    format = datetime.PY_DATE_FMT
+    _javascript = """<script type="text/javascript" language="JavaScript" 
+                  src="/resource/datePick.js"></script>"""
+    parse = _datetime_parse
+
+    def __init__(self, name, value=None, size=None, 
+                 maxlength=None, readonly=False, required=False, form_name=None):
+        AKStringWidget.__init__(self, name, value, size=size,
+                       maxlength=maxlength, readonly=readonly, required=required)
+        self.form_name = form_name or 'forms[0]'
+                     
+    def render(self, request):
+        if self.readonly:
+            return _render_readonly_tag(self.name, self.value)
+        else:
+            #Should be :
+            #request.response.add_javascript('show_calendar', self._javascript)
+            #But since we are not adding code, we are only adding the location
+            #of the code, so not that.
+            result = htmltext(self._javascript)
+            result += htmltag('input', xml_end=1,
+                     type='text',
+                     name=self.name,
+                     value=self.value)
+            result += htmltext("""
+            <a href="javascript:show_calendar('%s.%s');"><img
+            src="/resource/calendar.gif" title="Open Calendar"/></a>(%s)
+            """ % (self.form_name, self.name, datetime.WIDGET_DATE_FMT))
+            return result
+
+
+class AKTimeWidget(AKStringWidget):
+    widget_type = "ak_time"
+    format = datetime.PY_TIME_FMT
+    parse = _datetime_parse
+    
+    def render(self, request):
+        if self.readonly:
+            return _render_readonly_tag(self.name, self.value)
+        else:
+            return htmltag('input', xml_end=1,
+                     type='text',
+                     name=self.name,
+                     value=self.value) + '(%s)' % datetime.WIDGET_TIME_FMT
+
+
+class AKSingleSelectWidget(SingleSelectWidget):
+    '''We allow empty allowed_values list; in this
+    case, value won't be submitted at all, and it
+    will come out as a Null.
+    '''
+    widget_type = 'ak_single_select'
+    parent = SingleSelectWidget
+    parse = _parse    
+
+    def __init__(self, name, value=None,
+                 allowed_values=None,
+                 descriptions=None,
+                 options=None,
+                 size=None,
+                 sort=0,
+                 verify_selection=1,
+                 required=False):
+        self.required = required
+        try:
+            SingleSelectWidget.__init__(self, name=name, value=value,
+                                        allowed_values=allowed_values,
+                                        descriptions=descriptions,
+                                        options=options,
+                                        size=size,
+                                        sort=sort,
+                                        verify_selection=verify_selection)
+
+        except AssertionError, msg:
+            if str(msg) == 'cannot pass empty allowed_values list':
+                self.set_allowed_values(allowed_values, descriptions, sort)
+                self.set_name(name)
+                self.set_value(value)
+                self.size = size
+                self.verify_selection = verify_selection
+            else:
+                raise
+        

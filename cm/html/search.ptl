@@ -1,0 +1,91 @@
+from cm.htmllib import base, AKForm
+
+
+def search [html] (request):
+    form_name = 'search_form'
+    base.header(request, title='Search', focus_form=form_name)
+    temporary(request)
+    #SearchForm().handle(request)
+    base.footer(request)
+
+
+#class SearchForm:
+#    def handle(request):
+#        if form_submitted:
+#            return process(request)
+#        else:
+#            return render(request)
+#        
+#        self.set_message('Coming soon :)')
+#        
+#        self.set_title('Search')
+#        self.add_widget('ak_string', 'terms', title='Search Terms')
+#        self.add_widget('ak_single_select', 'match', title='Match')
+#        self.add_widget('ak_checkbox', 'case', title='Filters')
+#        #self.add_widget('ak_string')
+#        #self.add_widget('ak_string')
+#        self.add_submit_button('submit', 'Search')
+
+#    def action(self, request, submit, form_data):
+#        return ResultList(request, form_data)
+#    
+
+#def ResultList [html] (request, form_data):
+#    return '' #XXX
+#    ##a = List('rl',  , form_data)
+#    #a.set_title('Search Results')
+#    #a.set_columns()
+#    #a.render_header(request)
+#    #for rs in a.iter_resultsets()
+#    #a.render_footer(request)
+
+
+def temporary [html] (request):
+    '''
+    <form action="search" method="POST">
+    <table class="form">
+        <tr>
+        <td colspan="2"></td>
+        </tr>
+        <tr>
+        <td valign="top"><b>Search terms:</b></td>
+        <td valign="top"><input type="text" name="words" value="" size="40" /></td>
+        </tr>
+        <tr>
+        <td valign="top"><b>Match:</b></td>
+        <td valign="top">
+            <select name="all">
+            <option value="Any">Any</option>
+            <option selected="selected" value="All">All</option>
+            </select> of the search terms</td>
+        </tr>
+        <tr>
+        <td valign="top"><b>Filters:</b></td>
+        <td valign="top">
+            <table width="100%">
+            <tr><th>Categories</th></tr>
+            <tr><td valign="top">
+            <input checked="checked" type="checkbox" name="ctype1" value="yes" 
+            />&nbsp;Cases<br>
+            <input checked="checked" type="checkbox" name="ctype2" value="yes" 
+            />&nbsp;Incidents<br>
+            <input checked="checked" type="checkbox" name="ctype3" value="yes" 
+            />&nbsp;Attachments<br>
+            <input type="checkbox" name="ctype5" value="yes" 
+            />&nbsp;Interviews<br>
+            <input type="checkbox" name="ctype7" value="yes" 
+            />&nbsp;Items Lost/Recovered<br>
+            <input type="checkbox" name="ctype50" value="yes" 
+            />&nbsp;Daily Log<br>
+            <input type="checkbox" name="ctype50" value="yes" 
+            />&nbsp;Expense</td>
+            </tr>
+            </table>
+        </td>
+        </tr>
+        <tr>
+        <td valign="top"><b></b></td>
+        <td valign="top"><input type="submit" name="search" value="Search"/></td>
+        </tr>
+    </table>
+    </form>'''

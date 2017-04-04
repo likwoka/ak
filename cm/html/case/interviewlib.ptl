@@ -1,0 +1,95 @@
+from cm.htmllib import base, AKForm, Grid, Pre
+from cm.model.interview import Interview
+from cm import datetime
+
+
+def get_interview(interview_id):
+    return base.get_instance(Interview().get, {'interview_id':interview_id})
+
+
+def InterviewDetails [html] (request, interview_id):
+    data = get_interview(interview_id)    
+    d = Grid()
+    d.set_title(_('Interview Details'))
+    d.add_item(_('Interview Id'), value=interview_id)
+    d.add_item(_('Case Id'), value=data.case_id)
+    d.add_item(_('Date'), value=data.date)
+    d.add_item(_('Time'), value=data.time)
+    d.add_item(_('Interviewer'), value=data.interviewer)
+    d.add_item(_('Interviewee'), value=data.interviewee)
+    d.add_item(_('Description'), value=Pre(data.description))
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../../?tab=interview')
+    d.render(request) 
+
+
+class InterviewForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='interview_form')
+        self.add_widget('ak_string', 'interview_id', title=_('Interview Id'))
+        self.add_widget('ak_string', 'case_id', title=_('Case Id'), 
+                        readonly=True)
+        self.add_widget('ak_date', 'date', title=_('Date'), required=True)
+        self.add_widget('ak_time', 'time', title=_('Time'))
+        self.add_widget('ak_string', 'interviewer', title=_('Interviewer'), 
+                        required=True)        
+        self.add_widget('ak_string', 'interviewee', title=_('Interviewee'), 
+                        required=True)        
+        self.add_widget('ak_text', 'description', title=_('Description'), 
+                        required=True)
+
+
+class InterviewCreateForm(InterviewForm):
+    def __init__(self, case_id):
+        self.case_id = case_id
+        InterviewForm.__init__(self)
+        self.set_title(_('Add An Interview Entry'))
+        self.remove_widget('interview_id')
+        self.set_widget('case_id', value=case_id)
+        self.add_submit_button('run', _('Add'))
+
+    def action(self, request, submit, form_data):
+        form_data['interview_id'] = Interview().get_id()
+        form_data['owner'] = request.session.user
+        form_data['datetime'] = datetime.now()
+        try:
+            Interview().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('../?tab=interview')
+        
+
+class InterviewModifyForm(InterviewForm):
+    def __init__(self, interview_id):
+        self.interview_id = interview_id
+        data = get_interview(interview_id) 
+        InterviewForm.__init__(self)
+        self.set_title(_('Modify An Interview Entry'))
+        self.set_widgets_value(data)
+        self.set_widget('interview_id', value=interview_id, readonly=True)
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['interview_id'] = self.interview_id
+        try:
+            Interview().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+    
+    
+class InterviewDeleteForm(AKForm):
+    def __init__(self, interview_id):
+        self.interview_id = interview_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete An Interview Entry'))
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button('Cancel', '../../?tab=interview')
+
+    def action(self, request, submit, form_data):
+        Interview().delete({'interview_id':self.interview_id})
+        return request.redirect('../../?tab=interview')
+
+

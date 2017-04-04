@@ -1,0 +1,143 @@
+from cm.config import APP_ROOT, RES_ROOT
+from cm.htmllib import base, Link, Pre, Grid, List, TabPage, FileType
+from cm.model.incident import Incident, IncidentManager
+
+
+def get_incident(incident_id):
+    return base.get_instance(Incident().get, {'incident_id':incident_id})
+
+
+def IncidentList [html] (request):
+    t = List('incidents', IncidentManager().get)
+    t.add_link(_('Add An Incident'), 'create')
+    t.set_title(_('Incidents'))
+    t.set_columns((_('Incident Id'), 'incident_id'),
+                  (_('Description'), 'description'),
+                  (_('Date'), 'date'),
+                  (_('Time'), 'time'), 
+                  (_('Store Id'), 'store_id'),
+                  (_('Status'), 'status'),
+                  ('',))
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.incident_id, '%s/' % rs.incident_id, 
+                          _('Incident Details')), 
+                     rs.description,
+                     rs.date,
+                     rs.time,
+                     Link(rs.store_id, 
+                          '%sstore/%s/' % (APP_ROOT, rs.store_id),
+                          _('Store Details')),
+                     rs.status,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          '%s/delete' % rs.incident_id,
+                          _('Delete Incident')))
+    t.render_footer(request)
+
+
+def IncidentDetails [html] (request, incident_id):
+    t = TabPage()
+    t.set_title(_('Incident %s') % incident_id)
+    t.add_tab('info', _('Incident Info'), Info, default=True)
+    t.add_tab('item', _('Items Lost/Recovered'), ItemList)
+    t.add_tab('attachment', _('Attachments'), AttachmentList)
+    t.add_tab('case', _('Cases It Related To'), CaseList)
+    t.render(request, incident_id) 
+    
+
+def Info [html] (request, incident_id):
+    rs = get_incident(incident_id)
+    d = Grid()
+    d.add_item(_('Incident Id'), incident_id)
+    d.add_item(_('Description'), Pre(rs.description))
+    d.add_item(_('Who'), rs.who)
+    d.add_item(_('Date'), rs.date)
+    d.add_item(_('Time'), rs.time)
+    d.add_item(_('Store Id'), Link(rs.store_id, 
+                                '%sstore/%s/' % (APP_ROOT, rs.store_id)))
+    d.add_item(_('Location'), rs.location)
+    d.add_item(_('Narrative'), Pre(rs.narrative))
+    d.add_item(_('Outcome'), Pre(rs.outcome))
+    d.add_item(_('Service Request'), 
+               Pre(rs.service_request))
+    d.add_item(_('Status'), rs.status)
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../')
+    d.render(request)
+    
+
+def CaseList [html] (request, _id):
+    a = List('cl', Incident().get_cases, {'incident_id':_id})
+    a.set_columns((_('Case Id'), 'case_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     Link(rs.case_id, 
+                          '%scase/%s/' % (APP_ROOT, rs.case_id)),
+                     rs.description,
+                     rs.status)
+    a.render_footer(request)
+
+
+def AttachmentList [html] (request, _id):
+    a = List('al', Incident().get_attachments, {'incident_id':_id})
+    a.add_link(_('Upload An Attachment'), 
+               '%sattachment/upload?incident_id=%s' % (APP_ROOT, _id))
+    a.add_link(_('Attach An Existing Attachment'),
+               '%sattachment/attach_to?incident_id=%s' % (APP_ROOT, _id))
+    a.set_columns(('', 'filetype'),
+                  (_('Filename'), 'filename'),
+                  (_('Description'), 'description'),
+                  (_('Size (kB)'), 'size'),
+                  (_('Date'), 'date'),
+                  ('',),
+                  ('',))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     '<img src="%s%s"/>' % (RES_ROOT,
+                          FileType().get_image(rs.filetype)),
+                     Link(rs.filename, 
+                          '%sattachment/%s/' % (APP_ROOT, rs.attachment_id),
+                          _('Attachment Details')),
+                     rs.description,
+                     rs.size,
+                     rs.datetime,
+                     Link(_('Download'), 
+                          '%sattachment/download/%s/%s' % \
+                          (APP_ROOT, rs.attachment_id, rs.filename)),
+                     Link(_('Detach'), 
+                          '%sattachment/%s/detach?incident_id=%s' % \
+                          (APP_ROOT, rs.attachment_id, _id)))
+    a.render_footer(request)
+
+
+def ItemList [html] (request, _id):
+    a = List('iteml', Incident().get_items, {'incident_id':_id})
+    a.add_link(_('Add An Item'), 'item/create')
+    a.set_columns((_('Item Id'), 'item_id'),
+                  (_('Description'), 'description'),
+                  (_('Quantity'), 'quantity'),
+                  (_('Value'), 'amount_value'),
+                  (_('Status'), 'status'),
+                  ('',))
+
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     Link(rs.item_id, 'item/%s/modify' % rs.item_id,
+                          _('Modify Item')),
+                     rs.description,
+                     rs.quantity,
+                     rs.amount_value,
+                     rs.status,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          'item/%s/delete' % rs.item_id,
+                          _('Delete Incident')))
+    a.render_footer(request)
+
+

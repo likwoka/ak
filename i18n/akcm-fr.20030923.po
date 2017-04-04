@@ -1,0 +1,1088 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: Tue Sep 23 14:09:08 2003\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.4\n"
+
+
+#: ../htmllib/base.ptl:12
+msgid "What You Can Do"
+msgstr "Ce que Vous Pouvez Faire"
+
+#: ../htmllib/base.ptl:13
+msgid "Reports"
+msgstr "Rapports"
+
+#: ../htmllib/base.ptl:14
+msgid "Your Account"
+msgstr "Votre Compte"
+
+#: ../htmllib/base.ptl:15
+msgid "Search"
+msgstr "Recherche"
+
+#: ../htmllib/base.ptl:16 help.ptl:5
+msgid "Help!"
+msgstr "Aide!"
+
+#: ../htmllib/base.ptl:18
+msgid "Printable Version"
+msgstr "Version Imprimable"
+
+#: ../htmllib/base.ptl:21
+msgid "The Developers"
+msgstr "Les Réalisateurs"
+
+#: ../htmllib/base.ptl:137
+msgid "Find any bugs or have suggestions?"
+msgstr "Trouvez tous les bogues ou ayez les suggestions?"
+
+#: ../htmllib/base.ptl:138
+msgid "Give feedback here"
+msgstr "Donnez la rétroaction ici"
+
+#: ../htmllib/list.ptl:208
+msgid "No Data Found"
+msgstr "Aucunes Données Trouvées"
+
+#: aboutus.ptl:5 menu.py:20
+msgid "About Us"
+msgstr "Au sujet De Nous"
+
+#: aboutus.ptl:8
+msgid "We are ..."
+msgstr "Nous sommes ..."
+
+#: admin.ptl:13
+msgid "User Management"
+msgstr "Gestion D'Utilisateur"
+
+#: admin.ptl:14
+msgid "add/edit/delete users."
+msgstr "utilisateurs d'add/edit/delete."
+
+#: admin.ptl:15
+msgid "Role Management"
+msgstr "Gestion De Rôle"
+
+#: admin.ptl:16
+msgid "view/edit roles and permissions."
+msgstr "rôles et permissions de view/edit."
+
+#: admin.ptl:17
+msgid "Feedback Management"
+msgstr "Gestion De Rétroaction"
+
+#: admin.ptl:18
+msgid "view/edit feedbacks."
+msgstr "rétroactions de view/edit."
+
+#: admin.ptl:20
+msgid "Admin Home"
+msgstr "Admin À la maison"
+
+#: admin.ptl:22
+msgid "Please choose:"
+msgstr "Choisissez Svp:"
+
+#: attachment/attachmentlib.ptl:13 attachment/attachmentlib.ptl:194
+msgid "Attachment"
+msgstr "Attachement"
+
+#: attachment/attachmentlib.ptl:14 attachment/attachmentlib2.ptl:16
+#: attachment/attachmentlib2.ptl:44 attachment/attachmentlib2.ptl:62
+#: attachment/attachmentlib2.ptl:78 case/caselib.ptl:13 case/caselib2.ptl:18
+#: case/caselib2.ptl:51 case/caselib2.ptl:70 case/caselib2.ptl:94
+#: case/caselib2.ptl:126 case/caselib2.ptl:150 case/caselib2.ptl:172
+#: case/dailyloglib.ptl:17 case/dailyloglib.ptl:31 case/expenselib.ptl:16
+#: case/interviewlib.ptl:20 case/interviewlib.ptl:39 feedback/index.ptl:61
+#: feedback/index.ptl:83 feedback/index.ptl:111 incident/incidentlib.ptl:16
+#: incident/incidentlib2.ptl:15 incident/incidentlib2.ptl:53
+#: incident/incidentlib2.ptl:74 incident/incidentlib2.ptl:94
+#: incident/incidentlib2.ptl:123 incident/itemlib.ptl:17
+#: mypreference/lib.ptl:104 report/top_10_incidents.ptl:31 role/rolelib.ptl:11
+#: role/rolelib2.ptl:14 role/rolelib2.ptl:36 store/index.ptl:93
+#: user/userlib.ptl:14 user/userlib2.ptl:17 user/userlib2.ptl:45
+msgid "Description"
+msgstr "Description"
+
+#: attachment/attachmentlib.ptl:19 attachment/attachmentlib.ptl:232
+#: attachment/attachmentlib2.ptl:12 attachment/index.ptl:21
+#: case/caselib2.ptl:88 incident/incidentlib2.ptl:88
+msgid "Upload An Attachment"
+msgstr "Téléchargez Un Attachement"
+
+#: attachment/attachmentlib.ptl:22 attachment/attachmentlib.ptl:87
+msgid "Upload"
+msgstr "Téléchargement"
+
+#: attachment/attachmentlib.ptl:58 attachment/attachmentlib.ptl:109
+msgid "You have not uploaded anything."
+msgstr "Vous n'avez téléchargé rien."
+
+#: attachment/attachmentlib.ptl:67
+msgid "Modify Attachment Description"
+msgstr "Modifiez La Description D'Attachement"
+
+#: attachment/attachmentlib.ptl:85
+msgid "Replace A File"
+msgstr "Remplacez Un Dossier"
+
+#: attachment/attachmentlib.ptl:92
+msgid "You must supply a file."
+msgstr "Vous devez fournir un dossier."
+
+#: attachment/attachmentlib.ptl:117
+msgid "Delete Attachment"
+msgstr "Supprimez Attachement"
+
+#: attachment/attachmentlib.ptl:118 attachment/attachmentlib.ptl:139
+#: case/caselib.ptl:69 case/dailyloglib.ptl:79 case/expenselib.ptl:65
+#: case/interviewlib.ptl:87 feedback/index.ptl:203
+#: incident/incidentlib.ptl:106 incident/incidentlib.ptl:126
+#: incident/itemlib.ptl:70 role/rolelib.ptl:76 store/index.ptl:159
+#: user/userlib.ptl:104
+msgid "Are you sure?"
+msgstr "Êtes-vous sûr?"
+
+#: attachment/attachmentlib.ptl:119 attachment/attachmentlib2.ptl:50
+#: case/caselib.ptl:70 case/caselib2.ptl:58 case/dailyloglib.ptl:19
+#: case/dailyloglib.ptl:80 case/expenselib.ptl:66 case/interviewlib.ptl:22
+#: case/interviewlib.ptl:88 feedback/index.ptl:113 feedback/index.ptl:204
+#: incident/incidentlib.ptl:107 incident/incidentlib2.ptl:66
+#: incident/itemlib.ptl:71 role/rolelib.ptl:77 role/rolelib2.ptl:38
+#: store/index.ptl:86 store/index.ptl:160 user/userlib.ptl:105
+#: user/userlib2.ptl:53
+msgid "Delete"
+msgstr "Effacement"
+
+#: attachment/attachmentlib.ptl:120 case/caselib.ptl:71
+#: case/dailyloglib.ptl:81 case/expenselib.ptl:67 feedback/index.ptl:205
+#: incident/incidentlib.ptl:108 incident/itemlib.ptl:72 role/rolelib.ptl:78
+#: store/index.ptl:161 user/userlib.ptl:106
+msgid "Cancel"
+msgstr "Annulation"
+
+#: attachment/attachmentlib.ptl:134 attachment/index.ptl:69
+msgid "Detach Attachment"
+msgstr "Détachez L'Attachement"
+
+#: attachment/attachmentlib.ptl:136
+msgid "Delete the attachment"
+msgstr "Supprimez l'attachement"
+
+#: attachment/attachmentlib.ptl:140 case/caselib2.ptl:80 case/caselib2.ptl:115
+#: incident/incidentlib.ptl:127 incident/incidentlib2.ptl:113
+msgid "Detach"
+msgstr "Détachez"
+
+#: attachment/attachmentlib.ptl:146 incident/incidentlib.ptl:132
+msgid "Nothing to detach from."
+msgstr "Rien à détacher de."
+
+#: attachment/attachmentlib.ptl:181 attachment/index.ptl:29
+msgid "Attach An Attachment"
+msgstr "Attachez Un Attachement"
+
+#: attachment/attachmentlib.ptl:198 incident/incidentlib.ptl:172
+msgid "Attach"
+msgstr "Attache"
+
+#: attachment/attachmentlib.ptl:200
+msgid "No attachment found."
+msgstr "Aucun attachement trouvé."
+
+#: attachment/attachmentlib.ptl:206 incident/incidentlib.ptl:179
+msgid "Nothing to attach to."
+msgstr "Rien à attacher à."
+
+#: attachment/attachmentlib.ptl:234 attachment/attachmentlib2.ptl:51
+#: case/caselib2.ptl:59 case/dailyloglib.ptl:20 case/interviewlib.ptl:23
+#: feedback/index.ptl:114 incident/incidentlib2.ptl:67 role/rolelib2.ptl:39
+#: store/index.ptl:87 user/userlib2.ptl:54
+msgid "Go Up"
+msgstr "Montez"
+
+#: attachment/attachmentlib2.ptl:15 attachment/attachmentlib2.ptl:41
+#: case/caselib2.ptl:93 incident/incidentlib2.ptl:93
+msgid "Filename"
+msgstr "Nom de fichier"
+
+#: attachment/attachmentlib2.ptl:17 case/caselib2.ptl:95
+#: incident/incidentlib2.ptl:95
+msgid "Size (kB)"
+msgstr "Taille"
+
+#: attachment/attachmentlib2.ptl:18 attachment/attachmentlib2.ptl:45
+#: case/caselib2.ptl:96 case/caselib2.ptl:125 case/caselib2.ptl:147
+#: case/dailyloglib.ptl:16 case/dailyloglib.ptl:30 case/interviewlib.ptl:16
+#: case/interviewlib.ptl:33 incident/incidentlib2.ptl:16
+#: incident/incidentlib2.ptl:55 incident/incidentlib2.ptl:96
+msgid "Date"
+msgstr "Date"
+
+#: attachment/attachmentlib2.ptl:27 attachment/attachmentlib2.ptl:40
+#: attachment/index.ptl:47 case/caselib2.ptl:108 incident/incidentlib2.ptl:106
+msgid "Attachment Details"
+msgstr "Détails D'Attachement"
+
+#: attachment/attachmentlib2.ptl:31 attachment/attachmentlib2.ptl:46
+#: case/caselib2.ptl:112 incident/incidentlib2.ptl:110
+msgid "Download"
+msgstr "Téléchargement"
+
+#: attachment/attachmentlib2.ptl:42
+msgid "File Type"
+msgstr "Type De Dossier"
+
+#: attachment/attachmentlib2.ptl:43
+msgid "File Size"
+msgstr "Volume De Fichier"
+
+#: attachment/attachmentlib2.ptl:48 case/caselib.ptl:53 case/caselib2.ptl:57
+#: case/dailyloglib.ptl:18 case/dailyloglib.ptl:63 case/expenselib.ptl:49
+#: case/interviewlib.ptl:21 case/interviewlib.ptl:71 feedback/index.ptl:112
+#: feedback/index.ptl:187 incident/incidentlib.ptl:90
+#: incident/incidentlib2.ptl:65 incident/itemlib.ptl:54 role/rolelib.ptl:36
+#: role/rolelib.ptl:60 role/rolelib2.ptl:37 store/index.ptl:85
+#: store/index.ptl:143 user/userlib.ptl:60 user/userlib2.ptl:51
+msgid "Modify"
+msgstr "Modifiez"
+
+#: attachment/attachmentlib2.ptl:49
+msgid "Replace"
+msgstr "Remplacez"
+
+#: attachment/attachmentlib2.ptl:60
+msgid "Cases It Attached To"
+msgstr "Cas Il Attaché À"
+
+#: attachment/attachmentlib2.ptl:61 case/caselib.ptl:11 case/caselib2.ptl:17
+#: case/caselib2.ptl:50 case/dailyloglib.ptl:15 case/dailyloglib.ptl:28
+#: case/expenselib.ptl:14 case/interviewlib.ptl:15 case/interviewlib.ptl:31
+#: incident/incidentlib2.ptl:73
+msgid "Case Id"
+msgstr "Identification De Cas"
+
+#: attachment/attachmentlib2.ptl:63 attachment/attachmentlib2.ptl:79
+#: case/caselib.ptl:20 case/caselib2.ptl:19 case/caselib2.ptl:52
+#: case/caselib2.ptl:71 feedback/index.ptl:62 feedback/index.ptl:84
+#: feedback/index.ptl:105 feedback/index.ptl:142 incident/incidentlib.ptl:45
+#: incident/incidentlib2.ptl:19 incident/incidentlib2.ptl:64
+#: incident/incidentlib2.ptl:75 incident/incidentlib2.ptl:126
+#: incident/itemlib.ptl:21 report/top_10_incidents.ptl:32 store/index.ptl:94
+#: user/userlib.ptl:32 user/userlib2.ptl:19 user/userlib2.ptl:50
+msgid "Status"
+msgstr "Statut"
+
+#: attachment/attachmentlib2.ptl:76
+msgid "Incidents It Attached To"
+msgstr "Incidents Il Attaché À"
+
+#: attachment/attachmentlib2.ptl:77 case/caselib2.ptl:69
+#: incident/incidentlib.ptl:15 incident/incidentlib2.ptl:14
+#: incident/incidentlib2.ptl:52 incident/itemlib.ptl:15
+#: report/top_10_incidents.ptl:30 store/index.ptl:92
+msgid "Incident Id"
+msgstr "Identification D'Incident"
+
+#: attachment/index.ptl:13 menu.py:10
+msgid "Browse Attachments"
+msgstr "Passez en revue Les Attachements"
+
+#: attachment/index.ptl:53
+msgid "Modify An Attachment"
+msgstr "Modifiez Un Attachement"
+
+#: attachment/index.ptl:58
+msgid "Delete An Attachment"
+msgstr "Supprimez Un Attachement"
+
+#: attachment/index.ptl:64
+msgid "Replace An Attachment"
+msgstr "Remplacez Un Attachement"
+
+#: case/caselib.ptl:10 case/caselib2.ptl:26 case/index.ptl:39
+msgid "Case Details"
+msgstr "Détails De Cas"
+
+#: case/caselib.ptl:14 case/caselib2.ptl:53
+msgid "Hours Expended"
+msgstr "Les Heures Ont dépensé"
+
+#: case/caselib.ptl:15 case/caselib2.ptl:54
+msgid "Investigation"
+msgstr "Recherche"
+
+#: case/caselib.ptl:16 case/caselib2.ptl:55
+msgid "Evidence"
+msgstr "Évidence"
+
+#: case/caselib.ptl:17 case/caselib2.ptl:56 incident/incidentlib.ptl:39
+#: incident/incidentlib2.ptl:60
+msgid "Narrative"
+msgstr "Récit"
+
+#: case/caselib.ptl:28
+msgid "Create Case"
+msgstr "Créez Le Cas"
+
+#: case/caselib.ptl:31 incident/incidentlib.ptl:57 role/rolelib.ptl:18
+#: store/index.ptl:123 user/userlib.ptl:42
+msgid "Create"
+msgstr "Créez"
+
+#: case/caselib.ptl:50
+msgid "Modify Case"
+msgstr "Modifiez Le Cas"
+
+#: case/caselib.ptl:68
+msgid "Delete Case %s"
+msgstr "Supprimez Le Cas %s"
+
+#: case/caselib2.ptl:15 case/index.ptl:16
+msgid "Open A Case"
+msgstr "Ouvrez Un Cas"
+
+#: case/caselib2.ptl:16
+msgid "Cases"
+msgstr "Cas"
+
+#: case/caselib2.ptl:31
+msgid "Delete Case"
+msgstr "Supprimez Le Cas"
+
+#: case/caselib2.ptl:37
+msgid "Case %s"
+msgstr "Cas %s"
+
+#: case/caselib2.ptl:38
+msgid "Case Info"
+msgstr "Information De Cas"
+
+#: case/caselib2.ptl:39
+msgid "Daily Log"
+msgstr "Notation Quotidienne"
+
+#: case/caselib2.ptl:40 incident/incidentlib2.ptl:13
+msgid "Incidents"
+msgstr "Incidents"
+
+#: case/caselib2.ptl:41 incident/incidentlib2.ptl:44
+msgid "Attachments"
+msgstr "Attachements"
+
+#: case/caselib2.ptl:42
+msgid "Interviews"
+msgstr "Entrevues"
+
+#: case/caselib2.ptl:43
+msgid "Expense"
+msgstr "Dépenses"
+
+#: case/caselib2.ptl:65 incident/incidentlib2.ptl:12 incident/index.ptl:17
+msgid "Add An Incident"
+msgstr "Ajoutez Un Incident"
+
+#: case/caselib2.ptl:67
+msgid "Attach An Existing Incident"
+msgstr "Attachez Un Incident Existant"
+
+#: case/caselib2.ptl:90 incident/incidentlib2.ptl:90
+msgid "Attach An Existing Attachment"
+msgstr "Attachez Un Attachement Existant"
+
+#: case/caselib2.ptl:123 case/dailylog.ptl:11 case/dailyloglib.ptl:39
+msgid "Add A Log Entry"
+msgstr "Ajoutez Une Entrée De Notation"
+
+#: case/caselib2.ptl:124 case/dailyloglib.ptl:14
+msgid "Daily Log Id"
+msgstr "Identification Quotidienne De Notation"
+
+#: case/caselib2.ptl:134
+msgid "Log Details"
+msgstr "Détails De Notation"
+
+#: case/caselib2.ptl:139
+msgid "Delete Log"
+msgstr "Notation D'Effacement"
+
+#: case/caselib2.ptl:145 case/interview.ptl:11
+msgid "Add An Interview"
+msgstr "Ajoutez Une Entrevue"
+
+#: case/caselib2.ptl:146 case/interviewlib.ptl:14 case/interviewlib.ptl:30
+msgid "Interview Id"
+msgstr "Identification D'Entrevue"
+
+#: case/caselib2.ptl:148 case/interviewlib.ptl:18 case/interviewlib.ptl:35
+msgid "Interviewer"
+msgstr "Interviewer"
+
+#: case/caselib2.ptl:149 case/interviewlib.ptl:19 case/interviewlib.ptl:37
+msgid "Interviewee"
+msgstr "Interviewé"
+
+#: case/caselib2.ptl:158 case/interview.ptl:34 case/interviewlib.ptl:13
+msgid "Interview Details"
+msgstr "Détails D'Entrevue"
+
+#: case/caselib2.ptl:165
+msgid "Delete Interview"
+msgstr "Supprimez L'Entrevue"
+
+#: case/caselib2.ptl:171 case/expense.ptl:11 case/expenselib.ptl:25
+msgid "Add An Expense"
+msgstr "Ajoutez Des Dépenses"
+
+#: case/caselib2.ptl:173 case/expenselib.ptl:18 report/top_10_incidents.ptl:33
+msgid "Amount ($)"
+msgstr "Quantité ($)"
+
+#: case/caselib2.ptl:181 case/expenselib.ptl:46
+msgid "Modify Expense"
+msgstr "Modifiez Les Dépenses"
+
+#: case/caselib2.ptl:185 case/expenselib.ptl:64
+msgid "Delete Expense"
+msgstr "Supprimez Les Dépenses"
+
+#: case/dailylog.ptl:33
+msgid "Daily Log Entry"
+msgstr "Entrée Quotidienne De Notation"
+
+#: case/dailylog.ptl:38
+msgid "Modify A Log Entry"
+msgstr "Modifiez Une Entrée De Notation"
+
+#: case/dailylog.ptl:43
+msgid "Delete A Log Entry"
+msgstr "Supprimez Une Entrée De Notation"
+
+#: case/dailyloglib.ptl:13
+msgid "Daily Log Details"
+msgstr "Détails Quotidiens De Notation"
+
+#: case/dailyloglib.ptl:27
+msgid "Log Entry Id"
+msgstr "Identification D'Entrée De Notation"
+
+#: case/dailyloglib.ptl:42 case/expenselib.ptl:28 case/interviewlib.ptl:50
+#: incident/itemlib.ptl:33
+msgid "Add"
+msgstr "Ajoutez"
+
+#: case/dailyloglib.ptl:60
+msgid "Modify Log Entry"
+msgstr "Modifiez L'Entrée De Notation"
+
+#: case/dailyloglib.ptl:78
+msgid "Delete Log Entry"
+msgstr "Supprimez L'Entrée De Notation"
+
+#: case/expense.ptl:30
+msgid "Modify An Expense"
+msgstr "Modifiez Des Dépenses"
+
+#: case/expense.ptl:35
+msgid "Delete An Expense"
+msgstr "Supprimez Des Dépenses"
+
+#: case/expenselib.ptl:13
+msgid "Expense Id"
+msgstr "Identification De Dépenses"
+
+#: case/index.ptl:11 menu.py:7
+msgid "Browse Cases"
+msgstr "Passez en revue Les Caisses"
+
+#: case/index.ptl:44
+msgid "Modify A Case"
+msgstr "Modifiez Un Cas"
+
+#: case/index.ptl:49
+msgid "Delete A Case"
+msgstr "Supprimez Un Cas"
+
+#: case/interview.ptl:39
+msgid "Modify An Interview"
+msgstr "Modifiez Une Entrevue"
+
+#: case/interview.ptl:44
+msgid "Delete An Interview"
+msgstr "Supprimez Une Entrevue"
+
+#: case/interviewlib.ptl:17 case/interviewlib.ptl:34
+#: incident/incidentlib2.ptl:17 incident/incidentlib2.ptl:56
+msgid "Time"
+msgstr "Temps"
+
+#: case/interviewlib.ptl:47
+msgid "Add An Interview Entry"
+msgstr "Ajoutez Une Entrée D'Entrevue"
+
+#: case/interviewlib.ptl:68
+msgid "Modify An Interview Entry"
+msgstr "Modifiez Une Entrée D'Entrevue"
+
+#: case/interviewlib.ptl:86
+msgid "Delete An Interview Entry"
+msgstr "Supprimez Une Entrée D'Entrevue"
+
+#: feedback/index.ptl:11
+msgid "Browse Feedbacks"
+msgstr "Passez en revue Les Rétroactions"
+
+#: feedback/index.ptl:16
+msgid "Give Feedback"
+msgstr "Donnez La Rétroaction"
+
+#: feedback/index.ptl:37 feedback/index.ptl:69 feedback/index.ptl:91
+#: feedback/index.ptl:103
+msgid "Feedback Details"
+msgstr "Détails De Rétroaction"
+
+#: feedback/index.ptl:42
+msgid "Modify Feedback"
+msgstr "Modifiez La Rétroaction"
+
+#: feedback/index.ptl:47
+msgid "Delete Feedback"
+msgstr "Supprimez La Rétroaction"
+
+#: feedback/index.ptl:58
+msgid "Feedbacks (Bugs)"
+msgstr "Rétroaction (Bogues)"
+
+#: feedback/index.ptl:59 feedback/index.ptl:81 feedback/index.ptl:104
+#: feedback/index.ptl:122
+msgid "Feedback Id"
+msgstr "Identification De Rétroaction"
+
+#: feedback/index.ptl:60 feedback/index.ptl:82 feedback/index.ptl:109
+msgid "Date/Time"
+msgstr "Date/Temps"
+
+#: feedback/index.ptl:63 feedback/index.ptl:85 feedback/index.ptl:107
+#: feedback/index.ptl:130
+msgid "Submitted By"
+msgstr "Soumis Près"
+
+#: feedback/index.ptl:64 feedback/index.ptl:86 feedback/index.ptl:108
+#: feedback/index.ptl:139
+msgid "Assigned To"
+msgstr "Assigné À"
+
+#: feedback/index.ptl:80
+msgid "Feedbacks (Suggestions)"
+msgstr "Rétroaction (Suggestions)"
+
+#: feedback/index.ptl:106
+msgid "Type"
+msgstr "Type"
+
+#: feedback/index.ptl:110 feedback/index.ptl:134 role/rolelib2.ptl:47
+msgid "URL"
+msgstr "URL"
+
+#: feedback/index.ptl:121
+msgid "Feedback"
+msgstr "Rétroaction"
+
+#: feedback/index.ptl:126
+msgid "Feedback Type"
+msgstr "Type De Rétroaction"
+
+#: feedback/index.ptl:132
+msgid "Server's Time"
+msgstr "Le Temps Du Serveur"
+
+#: feedback/index.ptl:146
+msgid "Comment"
+msgstr "Commentaire"
+
+#: feedback/index.ptl:156 report/top_10_incidents.ptl:20
+msgid "Submit"
+msgstr "Soumettez"
+
+#: feedback/index.ptl:176
+msgid "Thanks for submitting your feedback!  We would get back to you very soon."
+msgstr "Merci pour soumettre votre rétroaction! Nous obtiendrions de nouveau à vous très bientôt."
+
+#: feedback/index.ptl:178
+msgid "You can close this window now."
+msgstr "Vous pouvez fermer cette fenêtre maintenant."
+
+#: feedback/index.ptl:202
+msgid "Delete Feedback %s"
+msgstr "Rétroaction D'Effacement %s"
+
+#: home.ptl:5
+msgid "Home"
+msgstr "À la maison"
+
+#: home.ptl:29
+msgid "Intro"
+msgstr "Intro"
+
+#: home.ptl:36
+msgid "News"
+msgstr "Nouvelles"
+
+#: incident/incidentlib.ptl:14 incident/incidentlib2.ptl:25
+#: incident/index.ptl:45
+msgid "Incident Details"
+msgstr "Détails D'Incident"
+
+#: incident/incidentlib.ptl:22 store/index.ptl:122
+msgid "Create Store"
+msgstr "Créez Le Magasin"
+
+#: incident/incidentlib.ptl:30
+msgid "Store"
+msgstr "Magasin"
+
+#: incident/incidentlib.ptl:35 incident/incidentlib2.ptl:54
+msgid "Who"
+msgstr "Qui"
+
+#: incident/incidentlib.ptl:36
+msgid "Incident Date"
+msgstr "Date D'Incident"
+
+#: incident/incidentlib.ptl:38
+msgid "Incident Time"
+msgstr "Temps D'Incident"
+
+#: incident/incidentlib.ptl:40 incident/incidentlib2.ptl:61
+msgid "Outcome"
+msgstr "Résultats"
+
+#: incident/incidentlib.ptl:42 incident/incidentlib2.ptl:62
+msgid "Service Request"
+msgstr "Service La Demande"
+
+#: incident/incidentlib.ptl:53
+msgid "Create Incident"
+msgstr "Créez L'Incident"
+
+#: incident/incidentlib.ptl:105
+msgid "Delete Incident %s"
+msgstr "Supprimez L'Incident %s"
+
+#: incident/incidentlib.ptl:122
+msgid "Detach Incident"
+msgstr "Détachez L'Incident"
+
+#: incident/incidentlib.ptl:124
+msgid "Delete the incident"
+msgstr "Supprimez l'incident"
+
+#: incident/incidentlib.ptl:157 incident/index.ptl:25
+msgid "Attach An Incident"
+msgstr "Attachez Un Incident"
+
+#: incident/incidentlib.ptl:174
+msgid "No incident found."
+msgstr "Aucun incident n'a trouvé."
+
+#: incident/incidentlib2.ptl:18 incident/incidentlib2.ptl:57
+#: store/index.ptl:60 store/index.ptl:80 store/index.ptl:108
+msgid "Store Id"
+msgstr "Identification De Magasin"
+
+#: incident/incidentlib2.ptl:31 store/index.ptl:37 store/index.ptl:68
+#: store/index.ptl:79
+msgid "Store Details"
+msgstr "Les Détails De Magasin"
+
+#: incident/incidentlib2.ptl:35 incident/incidentlib2.ptl:140
+msgid "Delete Incident"
+msgstr "Supprimez L'Incident"
+
+#: incident/incidentlib2.ptl:41
+msgid "Incident %s"
+msgstr "L'Incident %s"
+
+#: incident/incidentlib2.ptl:42
+msgid "Incident Info"
+msgstr "Information D'Incident"
+
+#: incident/incidentlib2.ptl:43
+msgid "Items Lost/Recovered"
+msgstr "Les articles ont perdu/ont récupéré"
+
+#: incident/incidentlib2.ptl:45
+msgid "Cases It Related To"
+msgstr "Cas Il Lié À"
+
+#: incident/incidentlib2.ptl:59 store/index.ptl:61 store/index.ptl:81
+#: store/index.ptl:110
+msgid "Location"
+msgstr "Endroit"
+
+#: incident/incidentlib2.ptl:121 incident/item.ptl:11 incident/itemlib.ptl:30
+msgid "Add An Item"
+msgstr "Ajoutez Un Article"
+
+#: incident/incidentlib2.ptl:122 incident/itemlib.ptl:14
+msgid "Item Id"
+msgstr "Identification D'Article"
+
+#: incident/incidentlib2.ptl:124 incident/itemlib.ptl:19
+msgid "Quantity"
+msgstr "Quantité"
+
+#: incident/incidentlib2.ptl:125 incident/itemlib.ptl:20
+msgid "Value"
+msgstr "Valeur"
+
+#: incident/incidentlib2.ptl:133 incident/itemlib.ptl:51
+msgid "Modify Item"
+msgstr "Modifiez L'Article"
+
+#: incident/index.ptl:12 menu.py:8
+msgid "Browse Incidents"
+msgstr "Passez en revue Les Incidents"
+
+#: incident/index.ptl:50
+msgid "Modify An Incident"
+msgstr "Modifiez Un Incident"
+
+#: incident/index.ptl:55
+msgid "Delete An Incident"
+msgstr "Supprimez Un Incident"
+
+#: incident/index.ptl:60
+msgid "Detach An Incident"
+msgstr "Détachez Un Incident"
+
+#: incident/item.ptl:31
+msgid "Modify An Item"
+msgstr "Modifiez Un Article"
+
+#: incident/item.ptl:36
+msgid "Delete An Item"
+msgstr "Supprimez Un Article"
+
+#: incident/itemlib.ptl:69
+msgid "Delete Item"
+msgstr "Supprimez L'Article"
+
+#: login.ptl:11
+msgid "Login"
+msgstr "Ouverture"
+
+#: login.ptl:19
+msgid "AKONE Case Management System (alpha)"
+msgstr "Système de gestion de cas d'AKONE (alpha)"
+
+#: login.ptl:21
+msgid "This site requires cookie."
+msgstr "Cet emplacement exige le biscuit."
+
+#: login.ptl:28
+msgid "AKONE Login"
+msgstr "AKONE Ouverture"
+
+#: login.ptl:29 mypreference/lib.ptl:101 user/userlib.ptl:10
+#: user/userlib2.ptl:14 user/userlib2.ptl:40
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: login.ptl:31
+msgid "Password"
+msgstr "Mot de passe"
+
+#: login.ptl:37
+msgid "Log In"
+msgstr "Ouverture"
+
+#: login.ptl:43
+msgid "You must provide your username."
+msgstr "Vous devez fournir votre username."
+
+#: login.ptl:45
+msgid "You must provide a password."
+msgstr "Vous devez fournir un mot de passe."
+
+#: login.ptl:65
+msgid "Invalid username or password, try again."
+msgstr "Le username inadmissible ou le mot de passe, essayent encore."
+
+#: logout.ptl:9
+msgid "Logout"
+msgstr "Déconnexion"
+
+#: logout.ptl:12
+msgid "You have successfully logged out."
+msgstr "Vous vous êtes avec succès déconnecté."
+
+#: menu.py:6
+msgid "Your Homepage"
+msgstr "Votre Homepage"
+
+#: menu.py:9 store/index.ptl:11
+msgid "Browse Stores"
+msgstr "Passez en revue Les Magasins"
+
+#: menu.py:11
+msgid "Log Out"
+msgstr "Déconnectez"
+
+#: menu.py:14 report/top_10_incidents.ptl:7 report/top_10_incidents.ptl:15
+#: report/top_10_incidents.ptl:28
+msgid "Top 10 Incidents"
+msgstr "Incidents Du Principal 10"
+
+#: menu.py:17
+msgid "Change Preference"
+msgstr "Changez La Préférence"
+
+#: menu.py:21
+msgid "Admin"
+msgstr "Admin"
+
+#: mypreference/index.ptl:11 mypreference/lib.ptl:100
+msgid "User Preference"
+msgstr "Préférence D'Utilisateur"
+
+#: mypreference/index.ptl:17 mypreference/lib.ptl:43 mypreference/lib.ptl:108
+msgid "Change Email Address"
+msgstr "Changez Le Email address"
+
+#: mypreference/index.ptl:23 mypreference/lib.ptl:12 mypreference/lib.ptl:107
+#: user/userlib2.ptl:52
+msgid "Change Password"
+msgstr "Changez Le Mot de passe"
+
+#: mypreference/index.ptl:29 mypreference/lib.ptl:71 mypreference/lib.ptl:109
+msgid "Change Language"
+msgstr "Changez La Langue"
+
+#: mypreference/lib.ptl:14
+msgid "Current Password"
+msgstr "Mot de passe Courant"
+
+#: mypreference/lib.ptl:16 user/userlib.ptl:78
+msgid "New Password"
+msgstr "Nouveau Mot de passe"
+
+#: mypreference/lib.ptl:18 user/userlib.ptl:80
+msgid "Confirm your New Password"
+msgstr "Confirmez votre nouveau mot de passe"
+
+#: mypreference/lib.ptl:19 mypreference/lib.ptl:46 mypreference/lib.ptl:81
+#: user/userlib.ptl:81
+msgid "Save"
+msgstr "Économiser"
+
+#: mypreference/lib.ptl:25 user/userlib.ptl:87
+msgid "Your new password entries did not match."
+msgstr "Vos nouvelles entrées de mot de passe ne se sont pas assorties."
+
+#: mypreference/lib.ptl:45 mypreference/lib.ptl:103 user/userlib.ptl:13
+#: user/userlib2.ptl:16 user/userlib2.ptl:42
+msgid "Email"
+msgstr "Email"
+
+#: mypreference/lib.ptl:76 mypreference/lib.ptl:106 user/userlib.ptl:26
+#: user/userlib2.ptl:49
+msgid "Language"
+msgstr "Langue"
+
+#: mypreference/lib.ptl:102 user/userlib.ptl:12 user/userlib2.ptl:15
+#: user/userlib2.ptl:41
+msgid "Name"
+msgstr "Nom"
+
+#: mypreference/lib.ptl:105 role/rolelib.ptl:9 role/rolelib2.ptl:13
+#: role/rolelib2.ptl:35 user/userlib.ptl:17 user/userlib2.ptl:18
+#: user/userlib2.ptl:46
+msgid "Role"
+msgstr "Rôle"
+
+#: report/testgraph.ptl:5
+msgid "Test Graph"
+msgstr "Examinez Le Graphique"
+
+#: report/top_10_incidents.ptl:17
+msgid "Start Date"
+msgstr "Commencez Date"
+
+#: report/top_10_incidents.ptl:19
+msgid "End Date"
+msgstr "Date D'Extrémité"
+
+#: role/index.ptl:10
+msgid "Browse Roles"
+msgstr "Passez en revue Les Rôles"
+
+#: role/index.ptl:15 role/rolelib2.ptl:11
+msgid "Create A Role"
+msgstr "Créez Un Rôle"
+
+#: role/index.ptl:33 role/rolelib2.ptl:19 user/userlib2.ptl:31
+#: user/userlib2.ptl:48
+msgid "Role Details"
+msgstr "Détails De Rôle"
+
+#: role/index.ptl:38
+msgid "Modify A Role"
+msgstr "Modifiez Un Rôle"
+
+#: role/index.ptl:43
+msgid "Set Deny URLs"
+msgstr "Placez Nient URLs"
+
+#: role/index.ptl:48
+msgid "Delete A Role"
+msgstr "Supprimez Un Rôle"
+
+#: role/rolelib.ptl:17
+msgid "Create Role"
+msgstr "Créez Le Rôle"
+
+#: role/rolelib.ptl:33
+msgid "Modify Role Details"
+msgstr "Modifiez Les Détails De Rôle"
+
+#: role/rolelib.ptl:51 role/rolelib2.ptl:45
+msgid "Modify Blocked URLs"
+msgstr "Modifiez URLs Bloqué"
+
+#: role/rolelib.ptl:52
+msgid "Check the box to block the URL."
+msgstr "Vérifiez la boîte pour bloquer le URL."
+
+#: role/rolelib.ptl:75
+msgid "Delete Role %s"
+msgstr "Supprimez Le Rôle %s"
+
+#: role/rolelib2.ptl:12
+msgid "Roles"
+msgstr "Rôles"
+
+#: role/rolelib2.ptl:26
+msgid "Role %s"
+msgstr "Le Rôle %s"
+
+#: role/rolelib2.ptl:27
+msgid "Role Info"
+msgstr "Information De Rôle"
+
+#: role/rolelib2.ptl:28
+msgid "Blocked URLs"
+msgstr "URLs Bloqué"
+
+#: role/rolelib2.ptl:46
+msgid "URL Id"
+msgstr "Identification de URL"
+
+#: role/rolelib2.ptl:48
+msgid "Blocked"
+msgstr "Bloqué"
+
+#: role/rolelib2.ptl:61
+msgid "Yes"
+msgstr "Oui"
+
+#: store/index.ptl:16
+msgid "Create A Store"
+msgstr "Créez Un Magasin"
+
+#: store/index.ptl:42
+msgid "Modify A Store"
+msgstr "Modifiez Un Magasin"
+
+#: store/index.ptl:47
+msgid "Delete A Store"
+msgstr "Supprimez Un Magasin"
+
+#: store/index.ptl:58
+msgid "Add A Store"
+msgstr "Ajoutez Un Magasin"
+
+#: store/index.ptl:59
+msgid "Stores"
+msgstr "Magasins"
+
+#: store/index.ptl:72
+msgid "Delete Store"
+msgstr "Magasin D'Effacement"
+
+#: store/index.ptl:82 store/index.ptl:112
+msgid "Security"
+msgstr "Sécurité"
+
+#: store/index.ptl:83 store/index.ptl:114
+msgid "Key Holder Access"
+msgstr "Accès Principal De Support"
+
+#: store/index.ptl:84 store/index.ptl:116
+msgid "Protection System"
+msgstr "Système De Protection"
+
+#: store/index.ptl:91
+msgid "Store Incidents"
+msgstr "Les Incidents De Magasin"
+
+#: store/index.ptl:140
+msgid "Modify Store"
+msgstr "Modifiez Le Magasin"
+
+#: store/index.ptl:158
+msgid "Delete Store %s"
+msgstr "Supprimez Le Magasin %s"
+
+#: user/index.ptl:10
+msgid "Browse Users"
+msgstr "Passez en revue Les Utilisateurs"
+
+#: user/index.ptl:15 user/userlib2.ptl:12
+msgid "Create A User"
+msgstr "Créez Un Utilisateur"
+
+#: user/index.ptl:33 user/userlib2.ptl:25 user/userlib2.ptl:39
+msgid "User Details"
+msgstr "Petits groupes D'Utilisateur"
+
+#: user/index.ptl:38 user/userlib.ptl:57
+msgid "Modify User Details"
+msgstr "Modifiez Les Petits groupes D'Utilisateur"
+
+#: user/index.ptl:43 user/userlib.ptl:76
+msgid "Set User Password"
+msgstr "Placez Le Mot de passe D'Utilisateur"
+
+#: user/index.ptl:48
+msgid "Delete A User"
+msgstr "Supprimez Un Utilisateur"
+
+#: user/userlib.ptl:41
+msgid "Create User"
+msgstr "Créez L'Utilisateur"
+
+#: user/userlib.ptl:103
+msgid "Delete User %s"
+msgstr "Supprimez L'Utilisateur %s"
+
+#: user/userlib2.ptl:13
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: user/userlib2.ptl:28 user/userlib2.ptl:44
+msgid "Send Email To User"
+msgstr "Envoyez L'Email À l'Utilisateur"
+

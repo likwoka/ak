@@ -1,0 +1,32 @@
+from cm.htmllib import base
+from cm.html.mypreference.lib import ChangePasswordForm, \
+ChangeEmailForm, ChangeLanguageForm, UserPreference
+
+
+def _q_index [html] (request):
+    details(request)
+
+def details [html] (request):
+    username = request.session.user
+    base.header(request, _('User Preference'))
+    UserPreference(request, username)
+    base.footer(request)
+
+def changeemail [html] (request):
+    username = request.session.user
+    base.header(request, _('Change Email Address'))
+    ChangeEmailForm(username).handle(request)
+    base.footer(request)
+
+def changepassword [html] (request):
+    username = request.session.user
+    base.header(request, _('Change Password'))
+    ChangePasswordForm(username).handle(request)
+    base.footer(request)
+
+def changelanguage [html] (request):
+    username = request.session.user
+    base.header(request, _('Change Language'))
+    ChangeLanguageForm(username).handle(request)
+    base.footer(request)
+

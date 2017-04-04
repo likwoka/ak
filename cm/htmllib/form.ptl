@@ -1,0 +1,182 @@
+from types import StringType
+from quixote.form.form import Form
+from quixote.form.widget import FormValueError
+from quixote.html import htmlescape
+from cm.htmllib.internal_renderer import BaseRenderer
+
+
+def _my_render_body [html] (self, request):
+    '<table cellspacing="0" cellpadding="2" class="form">'
+    self._render_title(request)
+    self._render_message(request)
+   
+    '<tr><td colspan="%s">&nbsp;</td></tr>' % self.COLSPAN
+    
+    if filter(None, self.required.values()):
+        '<tr><td colspan="%s"><strong>*</strong>' % self.COLSPAN
+        ' <em>Required</em></td></tr>\n'
+    
+    self._render_visible_widgets(request)
+    self._render_links(request)
+    self._render_submit_buttons(request)
+    '</table>'
+
+
+def _my_render_widget_row [html] (self, request, widget):
+    if widget.widget_type == 'hidden':
+        return
+    if self.required.get(widget.name):
+        title = '* '
+    else:
+        title = ''
+    title += htmlescape(self.title[widget.name]) + ':' 
+
+    if widget.widget_type == 'ak_checkbox':
+        """
+        <tr><td colspan="2" class="form_key">%s%s</td>
+        """ % (widget.render(request), title)
+    else:
+        '<tr><td class="form_key">%s</td>' % title
+        if hasattr(widget, str('readonly')) and widget.readonly:
+            klass = 'form_value_ro'
+        else: klass = 'form_value'
+        '<td class="%s">%s</td>' % (klass, widget.render(request))
+    """
+    <td>%s</td><td class="form_hint">%s</td></tr>
+    """% (self._render_error(self.error.get(widget.name)),
+          self._render_hint(self.hint.get(widget.name)))
+
+def _my_render_submit_buttons [html] (self, request):
+    '<tr><td colspan="%s"><center>%s</center></td></tr>' % (self.COLSPAN, 
+        '&nbsp;'.join([button.render(request) for button in self.submit_buttons]))
+
+def _my_render_hint [html] (self, hint):
+    if hint:
+        return '(' + htmltext(hint.strip()) + ')'
+    else:
+        return ''
+
+
+class AKForm(Form, BaseRenderer):
+    """I am a subclass of the quixote.form.form.Form.
+    The main difference between me and the quixote Form is
+    that name labels are on the left hand side of
+    widgets, where as quixote Form has the label on top
+    of each widget.
+    """
+    
+    COLSPAN = 4
+    UPLOAD = 'multipart/form-data' #enctype for upload... 
+    
+    def __init__(self, method="post", name=None, enctype=None, use_tokens=1):
+        BaseRenderer.__init__(self)
+        self.ak_name = name
+        Form.__init__(self, method, enctype, use_tokens)
+
+    _render_widget_row = _my_render_widget_row
+    _render_body = _my_render_body
+    _render_submit_buttons = _my_render_submit_buttons
+    _render_hint = _my_render_hint
+
+    def render [html] (self, request, action_url):
+        assert type(action_url) is StringType
+        '<p>'
+        self._render_start(request, action_url, enctype=self.enctype,
+                           method=self.method, name=self.ak_name)
+        self._render_body(request)
+        self._render_finish(request)
+        '</p>'
+
+    def action [html] (self, request, submit, form_data):
+        #a default implementation such that no action won't create
+        #exceptions...
+        pass
+
+    def form_submitted(self, request):
+        if self.get_submit_button(request) is not None:
+            return True
+        return False
+
+    def set_widget(self, widget_name, **kw):
+        widget = self.widgets[widget_name]
+        for k, v in kw.items():
+            setattr(widget, k, v)
+    
+    def set_widgets_value(self, kw):
+        '''Set a dict of widget_name:'value'.
+        kw - a dictionary.'''
+        resultset = kw.items()
+        widgets = self.widgets.keys()
+        for widget_name, v in resultset:
+            if widget_name in widgets:
+                self.set_widget(widget_name, value=v)
+    
+    # widget_order, submit_buttons are list [], all
+    # others are dict {}
+    def remove_widget(self, name):
+        '''Removes the widget.
+        name - a string of the widget name.
+        '''
+        a = self.widgets[name]
+        self.widget_order.remove(a)
+        del self.widgets[name]
+        del self.title[name]
+        del self.hint[name]
+        del self.required[name]
+
+    def remove_all_widgets(self):
+        self.widget_order = []
+        self.submit_buttons = []
+        self.widgets = {}
+        self.title = {}
+        self.hint = {}
+        self.required = {}
+        
+    def remove_submit_button(self, name):
+        if name in self.widgets:
+            a = self.widgets[name]
+            self.submit_buttons.remove(a)
+            del self.widgets[name]
+        else:
+            raise 'No such submit button.'
+
+    def remove_cancel_button(self):
+        self.remove_submit_button('cancel')
+
+    def process (self, request):
+        """process(request : HTTPRequest) -> values : { string : any }
+
+        Process the form data, validating all input fields (widgets).
+        If any errors in input fields, adds error messages to the
+        'error' attribute (so that future renderings of the form will
+        include the errors).  Returns a dictionary mapping widget names to
+        parsed values.
+        """
+        self.error.clear()
+
+        values = {}
+        for widget in self.widget_order:
+            try:
+                val = widget.parse(request)
+            except FormValueError, exc:
+                values[widget.name] = widget.value
+                self.error[widget.name] = exc.msg
+            else:
+                values[widget.name] = val
+
+        return values
+
+    def add_widget(self, widget_type, name, value=None,
+                   title=None, hint=None, required=0, **args):
+        '''Difference: a widget marked "required" would be
+        required to have non-empty value.
+        '''
+        Form.add_widget(self, widget_type, name, value=value,
+                        title=title, hint=hint, required=required, **args)
+        
+        # We really don't need this if condition
+        # just want the minimal namespace pollution
+        #if required:
+        self.set_widget(name, required=required)
+
+

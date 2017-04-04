@@ -1,0 +1,80 @@
+from cm.htmllib import AKForm
+from cm.model.case import CaseManager, Case, CaseStatus
+from cm import datetime
+from cm.html.case.caselib2 import get_case, CaseDetails, CaseList
+
+
+class CaseForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='case_form')
+        self.set_title(_('Case Details'))
+        self.add_widget('ak_string', 'case_id', title=_('Case Id'))
+        self.add_widget('ak_text', 'description', 
+                        title=_('Description'), required=True)
+        self.add_widget('ak_int', 'hours_expended', title=_('Hours Expended'))
+        self.add_widget('ak_text', 'investigation', title=_('Investigation'))
+        self.add_widget('ak_text', 'evidence', title=_('Evidence'))
+        self.add_widget('ak_text', 'narrative', title=_('Narrative'))
+
+        status = CaseStatus().descs()
+        self.add_widget('ak_single_select', 'status', title=_('Status'),
+                        allowed_values=status,
+                        descriptions=status)
+
+
+class CaseCreateForm(CaseForm):
+    def __init__(self):
+        CaseForm.__init__(self)
+        self.set_title(_('Create Case'))
+        self.remove_widget('case_id')
+        self.remove_widget('status')
+        self.add_submit_button('run', _('Create'))
+
+    def action(self, request, submit, form_data):
+        case_id = form_data['case_id'] = Case().get_id()
+        form_data['owner'] = request.session.user
+        form_data['status'] = CaseStatus().descs()[0]
+        form_data['datetime'] = datetime.now()
+        try:
+            Case().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('%s/' % form_data['case_id']) 
+
+
+class CaseModifyForm(CaseForm):
+    def __init__(self, case_id):
+        self.case_id = case_id
+        data = get_case(case_id)
+        CaseForm.__init__(self)
+        self.set_title(_('Modify Case'))
+        self.set_widgets_value(data)
+        self.set_widget('case_id', readonly=True)
+        self.add_submit_button('run', _('Modify'))
+        
+    def action(self, request, submit, form_data):
+        form_data['case_id'] = self.case_id
+        try:
+            Case().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+            
+
+class CaseDeleteForm(AKForm):
+    def __init__(self, case_id):
+        self.case_id = case_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Case %s') % case_id)
+        self.set_message(_('Are you sure?')) 
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            Case().delete({'case_id': self.case_id})
+        except AssertionError:
+            pass 
+        return request.redirect('../browse')
+
+

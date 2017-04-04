@@ -1,0 +1,52 @@
+from cm.htmllib import base
+from cm.html.user.userlib import UserList, UserDetails, UserCreateForm, \
+UserModifyForm, UserSetPasswordForm, UserDeleteForm
+
+
+def _q_index [html] (request):
+    browse(request)
+
+def browse [html] (request):
+    base.header(request, title=_('Browse Users'))
+    UserList(request)
+    base.footer(request)
+
+def create [html] (request):
+    base.header(request, title=_('Create A User'))
+    UserCreateForm().handle(request)    
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return UserUI(name)
+
+
+class UserUI:
+    _q_exports = ['details', 'modify', 'setpassword', 'delete']
+    
+    def __init__(self, name):
+        self.username = name
+
+    def _q_index [html] (self, request):
+        self.details(request)
+    
+    def details [html] (self, request):
+        base.header(request, title=_('User Details'))
+        UserDetails(request, self.username)
+        base.footer(request)
+    
+    def modify [html] (self, request):
+        base.header(request, title=_('Modify User Details'))
+        UserModifyForm(self.username).handle(request)
+        base.footer(request)
+
+    def setpassword [html] (self, request):
+        base.header(request, title=_('Set User Password'))
+        UserSetPasswordForm(self.username).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete A User'))
+        UserDeleteForm(self.username).handle(request)
+        base.footer(request)
+
+

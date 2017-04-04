@@ -1,0 +1,44 @@
+from cm.htmllib import base, List, Link, AKForm
+from cm.config import APP_ROOT
+from cm.model.report.top_10_incidents import Logic
+
+
+def top_10_incidents [html] (request):
+    base.header(request, title=_('Top 10 Incidents'))
+    ReportForm().handle(request)
+    base.footer(request)
+
+
+class ReportForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='this_form', method='get')
+        self.set_title(_('Top 10 Incidents'))
+        self.add_widget('ak_date', 'start_date', 
+                        title=_('Start Date'), required=True)
+        self.add_widget('ak_date', 'end_date', 
+                        title=_('End Date'), required=True)
+        self.add_submit_button('run', _('Submit'))
+
+    def action(self, request, submit, form_data):
+        return ResultList(request, form_data)
+    
+
+def ResultList [html] (request, form_data):
+    a = List('rl', Logic().get, form_data)
+    a.set_title(_('Top 10 Incidents'), '%s - %s' % \
+                (form_data['start_date'], form_data['end_date']))
+    a.set_columns((_('Incident Id'), 'incident_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'),
+                  (_('Amount ($)'), 'amount'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     Link(rs.incident_id,
+                          '%sincident/%s/' % (APP_ROOT, rs.incident_id)),
+                     rs.description,
+                     rs.status,
+                     rs.amount)
+    a.render_footer(request)
+
+

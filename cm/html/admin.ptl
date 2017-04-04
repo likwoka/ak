@@ -1,0 +1,27 @@
+from cm.htmllib import base, Message, Link
+
+
+def admin [html] (request):
+    msg = '''
+          <div align="left">
+          <ul>
+          <li>%s - %s</li>
+          <li>%s - %s</li>
+          <li>%s - %s</li>
+          </ul>
+          </div>
+          ''' % (Link(_('User Management'), 'user/'), 
+                 _('add/edit/delete users.'),
+                 Link(_('Role Management'), 'role/'),
+                 _('view/edit roles and permissions.'),
+                 Link(_('Feedback Management'), 'feedback/'),
+                 _('view/edit feedbacks.'))
+    
+    base.header(request, title=_('Admin Home'))
+    m = Message()
+    m.set_title(_('Please choose:'))
+    m.set_message(msg)
+    m.render(request)
+    base.footer(request)
+
+

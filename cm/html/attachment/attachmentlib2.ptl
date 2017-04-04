@@ -1,0 +1,89 @@
+from cm.htmllib import base, FileType, Link, Pre, Grid, List
+from cm.config import APP_ROOT, RES_ROOT
+from cm.model.attachment import AttachmentManager, Attachment
+
+
+def get_attachment(attachment_id):
+    return base.get_instance(Attachment().get, {'attachment_id':attachment_id})
+
+
+def AttachmentList [html] (request):
+    t = List('attachments', AttachmentManager().get)
+    t.add_link(_('Upload An Attachment'), 'upload')
+    t.set_title('Attachments')
+    t.set_columns(('', 'filetype'),
+                  (_('Filename'), 'filename'),
+                  (_('Description'), 'description'),
+                  (_('Size (kB)'), 'size'),
+                  (_('Date'), 'date'),
+                  ('',))
+    
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     '<img src="%s%s"/>' % (RES_ROOT,
+                          FileType().get_image(rs.filetype)),
+                     Link(rs.filename, '%s/' % rs.attachment_id,
+                          _('Attachment Details')),
+                     rs.description,
+                     rs.size,
+                     rs.datetime,
+                     Link(_('Download'), 
+                          'download/%s/%s' % (rs.attachment_id,
+                          rs.filename)))
+    t.render_footer(request)
+
+
+def AttachmentDetails [html] (request, attachment_id):
+    data = get_attachment(attachment_id)
+    d = Grid()
+    d.set_title(_('Attachment Details'))
+    d.add_item(_('Filename'), data.filename)
+    d.add_item(_('File Type'), FileType().get_html(data.filetype))
+    d.add_item(_('File Size'), '%s kB' % data.size)
+    d.add_item(_('Description'), Pre(data.description))
+    d.add_item(_('Date'), data.datetime)
+    d.add_link(_('Download'), '../download/%s/%s' % (attachment_id, 
+               data.filename))
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Replace'), 'replace')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../')
+    d.render(request)
+
+    CaseList(request, attachment_id)
+    IncidentList(request, attachment_id)
+    
+
+def CaseList [html] (request, attachment_id):
+    a = List('cl', Attachment().get_cases, {'attachment_id':attachment_id})
+    a.set_title(_('Cases It Attached To'))
+    a.set_columns((_('Case Id'), 'case_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     Link(rs.case_id, 
+                          '%scase/%s/' % (APP_ROOT, rs.case_id)),
+                     rs.description,
+                     rs.status)
+    a.render_footer(request)
+     
+    
+def IncidentList [html] (request, attachment_id):
+    b = List('il', Attachment().get_incidents, {'attachment_id':attachment_id})
+    b.set_title(_('Incidents It Attached To'))
+    b.set_columns((_('Incident Id'), 'incident_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'))
+    b.render_header(request)
+    for rs in b.iter_resultsets():
+        b.render_row(rs,
+                     Link(rs.incident_id, 
+                          '%sincident/%s/' % (APP_ROOT, rs.incident_id)),
+                     rs.description,
+                     rs.status)
+    b.render_footer(request)
+
+

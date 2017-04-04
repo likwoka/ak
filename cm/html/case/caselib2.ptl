@@ -1,0 +1,188 @@
+from cm.config import RES_ROOT, APP_ROOT
+from cm.htmllib import base, Grid, List, Link, Pre, TabPage, FileType
+from cm.model.case import CaseManager, Case
+from cm.model.dailylog import DailyLogManager
+from cm.model.expense import ExpenseManager
+from cm.model.interview import InterviewManager
+
+
+def get_case(case_id):
+    return base.get_instance(Case().get, {'case_id':case_id})
+
+
+def CaseList [html] (request):
+    t = List('cases', CaseManager().get)
+    t.add_link(_('Open A Case'), 'create')
+    t.set_title(_('Cases'))
+    t.set_columns((_('Case Id'), 'case_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'),
+                  ('',))
+
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.case_id, '%s/' % rs.case_id, 
+                          _('Case Details')),
+                     rs.description,
+                     rs.status,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          '%s/delete' % rs.case_id,
+                          _('Delete Case')))
+    t.render_footer(request)
+
+
+def CaseDetails [html] (request, case_id):
+    t = TabPage()
+    t.set_title(_('Case %s') % case_id)
+    t.add_tab('info', _('Case Info'), Info, default=True)
+    t.add_tab('dailylog', _('Daily Log'), DailyLogList)
+    t.add_tab('incident', _('Incidents'), IncidentList)
+    t.add_tab('attachment', _('Attachments'), AttachmentList)
+    t.add_tab('interview', _('Interviews'), InterviewList)
+    t.add_tab('expense', _('Expense'), ExpenseList)
+    t.render(request, case_id)
+
+
+def Info [html] (request, case_id):
+    data = get_case(case_id)    
+    d = Grid()
+    d.add_item(_('Case Id'), value=case_id)
+    d.add_item(_('Description'), value=Pre(data.description))
+    d.add_item(_('Status'), value=data.status)
+    d.add_item(_('Hours Expended'), value=data.hours_expended)
+    d.add_item(_('Investigation'), value=Pre(data.investigation))
+    d.add_item(_('Evidence'), value=Pre(data.evidence))
+    d.add_item(_('Narrative'), value=Pre(data.narrative))
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../')
+    d.render(request)
+
+
+def IncidentList [html] (request, case_id):
+    b = List('il', Case().get_incidents, {'case_id':case_id})
+    b.add_link(_('Add An Incident'), 
+               '%sincident/create?case_id=%s' % (APP_ROOT, case_id))
+    b.add_link(_('Attach An Existing Incident'), 
+               '%sincident/attach_to?case_id=%s' % (APP_ROOT, case_id))
+    b.set_columns((_('Incident Id'), 'incident_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'),
+                  ('',))
+    b.render_header(request)
+    for rs in b.iter_resultsets():
+        b.render_row(rs,
+                     Link(rs.incident_id, 
+                          '%sincident/%s/' % (APP_ROOT, rs.incident_id)),
+                     rs.description,
+                     rs.status,
+                     Link(_('Detach'),
+                          '%sincident/%s/detach?case_id=%s' % \
+                          (APP_ROOT, rs.incident_id, case_id)))
+    b.render_footer(request)
+    
+
+def AttachmentList [html] (request, case_id):
+    a = List('al', Case().get_attachments, {'case_id':case_id})
+    a.add_link(_('Upload An Attachment'), 
+               '%sattachment/upload?case_id=%s' % (APP_ROOT, case_id))
+    a.add_link(_('Attach An Existing Attachment'),
+               '%sattachment/attach_to?case_id=%s' % (APP_ROOT, case_id))
+    a.set_columns(('', 'filetype'),
+                  (_('Filename'), 'filename'),
+                  (_('Description'), 'description'),
+                  (_('Size (kB)'), 'size'),
+                  (_('Date'), 'date'),
+                  ('',),
+                  ('',))
+    
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     '<img src="%s%s"/>' % (RES_ROOT,
+                          FileType().get_image(rs.filetype)),
+                     Link(rs.filename, 
+                          '%sattachment/%s/' % \
+                          (APP_ROOT, rs.attachment_id),
+                          _('Attachment Details')),
+                     rs.description,
+                     rs.size,
+                     rs.datetime,
+                     Link(_('Download'), 
+                          '%sattachment/download/%s/%s' % \
+                          (APP_ROOT, rs.attachment_id, rs.filename)),
+                     Link(_('Detach'), 
+                          '%sattachment/%s/detach?case_id=%s' % \
+                          (APP_ROOT, rs.attachment_id, case_id)))
+    a.render_footer(request)
+
+
+def DailyLogList [html] (request, case_id):
+    t = List('dailylogs', DailyLogManager().get, {'case_id':case_id})
+    t.add_link(_('Add A Log Entry'), 'dailylog/create')
+    t.set_columns((_('Daily Log Id'), 'daily_log_id'),
+                  (_('Date'), 'date'),
+                  (_('Description'), 'description'),
+                  ('',))
+
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.daily_log_id, 
+                          'dailylog/%s/' % rs.daily_log_id,
+                          _('Log Details')),
+                     rs.date,
+                     rs.description,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          'dailylog/%s/delete' % rs.daily_log_id,
+                          _('Delete Log')))
+    t.render_footer(request)
+
+
+def InterviewList [html] (request, case_id):
+    t = List('interviews', InterviewManager().get, {'case_id':case_id})
+    t.add_link(_('Add An Interview'), 'interview/create')
+    t.set_columns((_('Interview Id'), 'interview_id'),
+                  (_('Date'), 'date'),
+                  (_('Interviewer'), 'interviewer'),
+                  (_('Interviewee'), 'interviewee'),
+                  (_('Description'), 'description'),
+                  ('',))
+
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.interview_id, 
+                          'interview/%s/' % rs.interview_id,
+                          _('Interview Details')),
+                     rs.date,
+                     rs.interviewer,
+                     rs.interviewee,
+                     rs.description,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          'interview/%s/delete' % rs.interview_id,
+                          _('Delete Interview')))
+    t.render_footer(request)
+
+
+def ExpenseList [html] (request, case_id):
+    t = List('expenses', ExpenseManager().get, {'case_id':case_id})
+    t.add_link(_('Add An Expense'), 'expense/create')
+    t.set_columns((_('Description'), 'description'),
+                  (_('Amount ($)'), 'amount'),
+                  ('',))
+
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.description,
+                          'expense/%s/modify' % rs.expense_id,
+                          _('Modify Expense')),
+                     rs.amount,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          'expense/%s/delete' % rs.expense_id,
+                          _('Delete Expense')))
+    t.render_footer(request)
+
+

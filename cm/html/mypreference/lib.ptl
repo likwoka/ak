@@ -1,0 +1,112 @@
+from cm.htmllib import AKForm, Grid, Pre
+from cm.user import User
+from cm.html.user.userlib2 import get_user
+from cm.i18n import Language, LangInstance, LanguageManager
+
+
+class ChangePasswordForm(AKForm):
+    '''For a user to change her own password.'''
+    def __init__(self, username):
+        self.username = username
+        AKForm.__init__(self)
+        self.set_title(_('Change Password'))
+        self.add_widget('ak_password', 'old_password', 
+                        title=_('Current Password'), required=True)
+        self.add_widget('ak_password', 'new_password1',
+                        title=_('New Password'), required=True)
+        self.add_widget('ak_password', 'new_password2',
+                        title=_('Confirm your New Password'), required=True)
+        self.add_submit_button('run', _('Save'))
+
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if form_data['new_password1'] != form_data['new_password2']:
+            self.error['new_password2'] = \
+                _('Your new password entries did not match.')
+        return form_data
+
+    def action(self, request, submit, form_data):
+        form_data['username'] = self.username
+        try:
+            User().change_password(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+
+
+class ChangeEmailForm(AKForm):
+    '''For a user to change her own email address.'''
+    def __init__(self, username):
+        self.username = username
+        AKForm.__init__(self)
+        data = get_user(username)
+        self.set_title(_('Change Email Address'))
+        self.add_widget('ak_string', 'email', 
+                        title=_('Email'), value=data.email)
+        self.add_submit_button('run', _('Save'))
+        
+    def action(self, request, submit, form_data):
+        # We make sure no other fields except email.
+        # We need this check here because we are calling
+        # the generic User().set(...) method.
+        keys = form_data.keys()
+        for key in keys:
+            if key != 'email':
+                del form_data[key]
+        form_data['username'] = self.username
+        
+        try:
+            User().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+
+
+class ChangeLanguageForm(AKForm):
+    '''For a user to change her own language setting.'''
+    def __init__(self, username):
+        self.username = username
+        AKForm.__init__(self)
+        data = get_user(username)
+        self.set_title(_('Change Language'))
+        langman = LanguageManager()
+        lang_code = langman.get_codes()
+        lang_name = langman.get_names()
+        self.add_widget('ak_single_select', 'lang_code',
+                        title=_('Language'),
+                        value=data.lang_code,
+                        allowed_values=lang_code,
+                        descriptions=lang_name,
+                        required=True)
+        self.add_submit_button('run', _('Save'))
+
+    def action(self, request, submit, form_data):
+        keys = form_data.keys()
+        for key in keys:
+            if key !='lang_code':
+                del form_data[key]
+        form_data['username'] = self.username
+
+        try:
+            User().set(form_data)
+            request.session.set_lang(form_data['lang_code'])
+        except AssertionError:
+            pass
+        return request.redirect('details')
+    
+
+def UserPreference [html] (request, username):
+    data = get_user(username)
+    d = Grid()
+    d.set_title(_('User Preference'))
+    d.add_item(_('Username'), value=username)
+    d.add_item(_('Name'), value=data.name)
+    d.add_item(_('Email'), value=data.email)
+    d.add_item(_('Description'), value=Pre(data.description))
+    d.add_item(_('Role'), value=data.role)
+    d.add_item(_('Language'), value=Language(data.lang_code).name)
+    d.add_link(_('Change Password'), 'changepassword')
+    d.add_link(_('Change Email Address'), 'changeemail')
+    d.add_link(_('Change Language'), 'changelanguage')
+    d.render(request)
+

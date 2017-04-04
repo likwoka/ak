@@ -1,0 +1,87 @@
+from cm.htmllib import base, AKForm, Grid, Pre
+from cm import datetime
+from cm.model.dailylog import DailyLog
+
+
+def get_dailylog(daily_log_id):
+    return base.get_instance(DailyLog().get, {'daily_log_id':daily_log_id})
+
+
+def DailyLogDetails [html] (request, daily_log_id):
+    data = get_dailylog(daily_log_id)    
+    d = Grid()
+    d.set_title(_('Daily Log Details'))
+    d.add_item(_('Daily Log Id'), value=daily_log_id)
+    d.add_item(_('Case Id'), value=data.case_id)
+    d.add_item(_('Date'), value=data.date)
+    d.add_item(_('Description'), value=Pre(data.description))
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../../?tab=dailylog')
+    d.render(request) 
+
+
+class DailyLogForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='dailylog_form')
+        self.add_widget('ak_string', 'daily_log_id', title=_('Log Entry Id'))
+        self.add_widget('ak_string', 'case_id', title=_('Case Id'), 
+                        readonly=True)
+        self.add_widget('ak_date', 'date', title=_('Date')) 
+        self.add_widget('ak_text', 'description', title=_('Description'), 
+                        required=True)
+
+
+class DailyLogCreateForm(DailyLogForm):
+    def __init__(self, case_id):
+        self.case_id = case_id
+        DailyLogForm.__init__(self)
+        self.set_title(_('Add A Log Entry'))
+        self.remove_widget('daily_log_id')
+        self.set_widget('case_id', value=case_id)
+        self.add_submit_button('run', _('Add'))
+
+    def action(self, request, submit, form_data):
+        form_data['daily_log_id'] = DailyLog().get_id()
+        form_data['owner'] = request.session.user
+        form_data['datetime'] = datetime.now()
+        try:
+            DailyLog().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('../?tab=dailylog')
+        
+
+class DailyLogModifyForm(DailyLogForm):
+    def __init__(self, daily_log_id):
+        self.daily_log_id = daily_log_id
+        data = get_dailylog(daily_log_id) 
+        DailyLogForm.__init__(self)
+        self.set_title(_('Modify Log Entry'))
+        self.set_widgets_value(data)
+        self.set_widget('daily_log_id', value=daily_log_id, readonly=True)
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['daily_log_id'] = self.daily_log_id
+        try:
+            DailyLog().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+    
+    
+class DailyLogDeleteForm(AKForm):
+    def __init__(self, daily_log_id):
+        self.daily_log_id = daily_log_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Log Entry'))
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), '../../?tab=dailylog')
+
+    def action(self, request, submit, form_data):
+        DailyLog().delete({'daily_log_id':self.daily_log_id})
+        return request.redirect('../../?tab=dailylog')
+
+

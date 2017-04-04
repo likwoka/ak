@@ -1,0 +1,68 @@
+from cm.config import APP_ROOT
+from cm.user import User
+from cm.htmllib import base, AKForm
+
+
+def login [html] (request):
+    if User().is_logged_in(request): 
+        request.redirect(str('home'), permanent=1)
+    
+    form_name = 'loginform'
+    base.header(request, title=_('Login'), panels=False, 
+                focus_form=form_name)
+    '''
+    <center>
+    <h2>%s</h2>
+    <p>%s</p>
+    <address>* %s</address>
+    </center>
+    ''' % (_('AKONE Case Management System (alpha)'),
+           LoginForm(form_name).handle(request),
+           _('This site requires cookie.'))
+    base.footer(request, panels=False)
+
+
+class LoginForm(AKForm):
+    def __init__(self, name=None):
+        AKForm.__init__(self, name=name)
+        self.set_title(_("AKONE Login"))
+        self.add_widget("ak_string", "username", title=_("Username"), 
+                        size=18, maxlength=20)
+        self.add_widget("password", "password", title=_("Password"), 
+                        size=18, maxlength=20)
+        #REMOVED THIS FEATURE 2003 05 02
+        #self.add_widget("ak_checkbox", "persist_login", 
+        #                title="<em>Keep me logged in on this computer unless I \
+        #                log out</em>.")
+        self.add_submit_button("submit", _("Log In"))
+
+
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if not form_data['username']:
+            self.error['username'] = _('You must provide your username.')
+        if not form_data['password']:
+            self.error['password'] = _('You must provide a password.')
+        return form_data
+
+
+    def action(self, request, submit, form_data):
+        if User().login(form_data["username"],
+                           form_data["password"]):
+            User().register(request, form_data["username"])
+            
+            goto = request.get_environ('QUERY_STRING')
+            if goto.find('goto=') == 0: # found goto= at the start
+                goto = goto[5:]
+            else:
+                goto = None
+            
+            if goto:
+                return request.redirect(goto)
+            else:
+                return request.redirect('%shome' % APP_ROOT)
+        else:
+            self.set_message(_("Invalid username or password, try again."))
+            return self.render(request, self.get_action_url(request))
+
+

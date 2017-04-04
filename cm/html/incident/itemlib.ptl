@@ -1,0 +1,78 @@
+from cm.htmllib import base, AKForm
+from cm.model.item import Item, ItemStatus
+from cm import datetime
+
+
+def get_item(item_id):
+    return base.get_instance(Item().get, {'item_id':item_id})
+
+
+class ItemForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='item_form')
+        status = ItemStatus().descs()
+        self.add_widget('ak_string', 'item_id', title=_('Item Id'))
+        self.add_widget('ak_string', 'incident_id', title=_('Incident Id'), 
+                        readonly=True)
+        self.add_widget('ak_string', 'description', title=_('Description'), 
+                        required=True)
+        self.add_widget('ak_float', 'quantity', title=_('Quantity'))
+        self.add_widget('ak_float', 'amount_value', title=_('Value'))
+        self.add_widget('single_select', 'status', title=_('Status'),
+                        allowed_values=status,
+                        descriptions=status, required=True) 
+
+
+class ItemCreateForm(ItemForm):
+    def __init__(self, incident_id):
+        self.incident_id = incident_id
+        ItemForm.__init__(self)
+        self.set_title(_('Add An Item'))
+        self.remove_widget('item_id')
+        self.set_widget('incident_id', value=incident_id)
+        self.add_submit_button('run', _('Add'))
+
+    def action(self, request, submit, form_data):
+        form_data['item_id'] = Item().get_id()
+        form_data['owner'] = request.session.user
+        form_data['datetime'] = datetime.now()
+        try:
+            Item().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('../?tab=item')
+        
+
+class ItemModifyForm(ItemForm):
+    def __init__(self, item_id):
+        self.item_id = item_id
+        data = get_item(item_id) 
+        ItemForm.__init__(self)
+        self.set_title(_('Modify Item'))
+        self.set_widgets_value(data)
+        self.set_widget('item_id', value=item_id, readonly=True)
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['item_id'] = self.item_id
+        try:
+            Item().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('../../?tab=item')
+    
+    
+class ItemDeleteForm(AKForm):
+    def __init__(self, item_id):
+        self.item_id = item_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Item'))
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), '../../?tab=item')
+
+    def action(self, request, submit, form_data):
+        Item().delete({'item_id':self.item_id})
+        return request.redirect('../../?tab=item')
+
+

@@ -1,0 +1,214 @@
+from cm import datetime
+from cm.htmllib import base, AKForm, List, Grid, Link, Pre
+from cm.htmllib.base import html_quote, url_unquote
+from cm.feedback import FeedbackManager, Feedback, FeedbackStatus, FeedbackType
+
+
+def _q_index [html] (request):
+    browse(request)
+    
+def browse[html] (request):
+    base.header(request, title=_('Browse Feedbacks'))
+    FeedbackList(request)
+    base.footer(request)
+    
+def create [html] (request):
+    base.header(request, title=_('Give Feedback'), panels=False)
+    '<center>%s</center>' % FeedbackCreateForm(request).handle(request)
+    base.footer(request, panels=False)
+ 
+def _q_lookup(request, name):
+    return FeedbackUI(name)
+
+
+class FeedbackUI:
+    _q_exports = ['details', 'modify', 'delete']
+    
+    def __init__(self, name):
+        try:
+            self.feedback_id = int(name)
+        except ValueError:
+            raise error.TraversalError
+
+    def _q_index [html] (self, request):
+        self.details(request)
+
+    def details [html] (self, request):
+        base.header(request, _('Feedback Details'))
+        FeedbackDetails(request, self.feedback_id)
+        base.footer(request)
+
+    def modify [html] (self, request):
+        base.header(request, _('Modify Feedback'))
+        FeedbackModifyForm(request, self.feedback_id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete Feedback'))
+        FeedbackDeleteForm(self.feedback_id).handle(request)
+        base.footer(request)
+
+
+def get_feedback(feedback_id):
+    return base.get_instance(Feedback().get, {'feedback_id':feedback_id})
+
+
+def FeedbackList [html] (request):
+    a = List('fb_bugs', FeedbackManager().get_bugs)
+    a.set_title(_('Feedbacks (Bugs)'))
+    a.set_columns((_('Feedback Id'), 'feedback_id'),
+                  (_('Date/Time'), 'datetime'),
+                  (_('Description'),),
+                  (_('Status'), 'status'),
+                  (_('Submitted By'), 'submitted_by'),
+                  (_('Assigned To'), 'assigned_to'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     Link(rs.feedback_id, '%s/' % rs.feedback_id,
+                          _('Feedback Details')),
+                     rs.datetime,
+                     rs.description,
+                     rs.status,
+                     rs.submitted_by_user,
+                     rs.assigned_to_user)
+    a.render_footer(request)
+
+    '<br/>'
+
+    b = List('fb_suggestions', FeedbackManager().get_suggestions)
+    b.set_title(_('Feedbacks (Suggestions)'))
+    b.set_columns((_('Feedback Id'), 'feedback_id'),
+                  (_('Date/Time'), 'datetime'),
+                  (_('Description'),),
+                  (_('Status'), 'status'),
+                  (_('Submitted By'), 'submitted_by'),
+                  (_('Assigned To'), 'assigned_to'))
+    b.render_header(request)
+    for rs in b.iter_resultsets():
+        b.render_row(rs,
+                     Link(rs.feedback_id, '%s/' % rs.feedback_id,
+                          _('Feedback Details')),
+                     rs.datetime,
+                     rs.description,
+                     rs.status,
+                     rs.submitted_by_user,
+                     rs.assigned_to_user)
+    b.render_footer(request)
+
+
+def FeedbackDetails [html] (request, feedback_id):
+    data = get_feedback(feedback_id)
+    a = Grid()
+    a.set_title(_('Feedback Details'))
+    a.add_item(_('Feedback Id'), value=feedback_id)
+    a.add_item(_('Status'), value=data.status)
+    a.add_item(_('Type'), value=data.type)
+    a.add_item(_('Submitted By'), value=data.submitted_by_user)
+    a.add_item(_('Assigned To'), value=data.assigned_to_user)
+    a.add_item(_('Date/Time'), value=data.datetime)
+    a.add_item(_('URL'), value=data.url)
+    a.add_item(_('Description'), value=Pre(data.description))
+    a.add_link(_('Modify'), 'modify')
+    a.add_link(_('Delete'), 'delete')
+    a.add_link(_('Go Up'), '../')
+    a.render(request)
+
+    
+class FeedbackForm(AKForm):
+    def __init__(self, request):
+        AKForm.__init__(self)
+        self.set_title(_('Feedback'))
+        self.add_widget('ak_int', 'feedback_id', title=_('Feedback Id'), 
+                        readonly=True)
+        
+        t = FeedbackType().descs()
+        self.add_widget('ak_radiobuttons', 'type', title=_('Feedback Type'),
+                        allowed_values=t, required=True)
+                        
+        self.add_widget('ak_string', 'submitted_by_user', 
+                        title=_('Submitted By'), 
+                        value=request.session.user, readonly=True)
+        self.add_widget('ak_string', 'datetime', title=_("Server's Time"),
+                        value=datetime.now(), readonly=True)
+        self.add_widget('ak_string', 'url', title=_('URL'),
+                        value=url_unquote(request.get_environ('QUERY_STRING')), 
+                        readonly=True)
+
+        self.add_widget('ak_string', 'assigned_to_user', 
+                        title=_('Assigned To'))
+        
+        status = FeedbackStatus().descs()
+        self.add_widget('ak_single_select', 'status', title=_('Status'),
+                        allowed_values=status,
+                        descriptions=status)
+        
+        self.add_widget('ak_text', 'description', title=_('Comment'), 
+                        rows=14, cols=45, required=True)
+
+    
+class FeedbackCreateForm(FeedbackForm):
+    def __init__(self, request):
+        FeedbackForm.__init__(self, request)
+        self.remove_widget('feedback_id')
+        self.remove_widget('assigned_to_user')
+        self.remove_widget('status')
+        self.add_submit_button('run', _('Submit'))
+        
+    def action [html] (self, request, submit, form_data):
+        try:
+            f = Feedback()
+        except AssertionError:
+            pass
+        form_data['feedback_id'] = f.get_id()
+        form_data['submitted_by'] = request.session.user
+        try:
+            f.new(form_data)
+        except AssertionError:
+            pass
+        """
+        <strong>
+        <p>&nbsp;</p>
+        <p>%s</p>  
+        <p>%s</p>
+        </strong>
+        """ % (
+        _('Thanks for submitting your feedback!  ' \
+        'We would get back to you very soon.'), 
+        _('You can close this window now.'))
+
+
+class FeedbackModifyForm(FeedbackForm):
+    def __init__(self, request, feedback_id):
+        FeedbackForm.__init__(self, request)
+        self.feedback_id = feedback_id
+        data = get_feedback(feedback_id)
+        self.set_widgets_value(data)
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['feedback_id'] = self.feedback_id
+        try:
+            Feedback().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+
+
+class FeedbackDeleteForm(AKForm):
+    def __init__(self, feedback_id):
+        self.feedback_id = feedback_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Feedback %s') % feedback_id)
+        self.set_message(_('Are you sure?')) 
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            Feedback().delete({'feedback_id': self.feedback_id})
+        except AssertionError:
+            pass
+        return request.redirect('../browse')
+
+

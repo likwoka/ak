@@ -1,0 +1,14 @@
+from cm.htmllib import base
+
+
+def aboutus [plain] (request):
+    base.header(request, title=_('About Us'))
+    '<h3>%s</h3>' % _('We are ...')
+    
+    """
+    <p><h4>Alex Li</h4> (Toronto, Canada)
+    <br/>Email: <a href="mailto:likwoka@yahoo.com">likwoka@yahoo.com</a>
+    <br/>Phone: 416-223-8321
+    </p>
+    """
+    base.footer(request)

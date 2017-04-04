@@ -1,0 +1,52 @@
+from cm.htmllib import base
+from cm.html.case.caselib import CaseList, CaseDetails, CaseCreateForm, \
+CaseModifyForm, CaseDeleteForm
+from cm import error
+
+
+def _q_index [html] (request):
+    browse(request)
+
+def browse [html] (request):
+    base.header(request, title=_('Browse Cases'))
+    CaseList(request)
+    base.footer(request)
+
+def create [html] (request):
+    base.header(request, title=_('Open A Case'))
+    CaseCreateForm().handle(request)
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return CaseUI(name)
+
+
+class CaseUI:
+    from cm.html.case import expense, dailylog, interview
+    _q_exports = ['details', 'expense', 'dailylog', 
+                  'interview', 'modify', 'delete']
+
+    def __init__(self, name):
+        try:
+            self.case_id = int(name)
+        except ValueError:
+            raise error.TraversalError
+
+    def _q_index [html] (self, request):
+        self.details(request)
+
+    def details [html] (self, request):
+        base.header(request, title=_('Case Details'))
+        CaseDetails(request, self.case_id)
+        base.footer(request)
+
+    def modify [html] (self, request):
+        base.header(request, title=_('Modify A Case'))
+        CaseModifyForm(self.case_id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete A Case'))
+        CaseDeleteForm(self.case_id).handle(request)
+        base.footer(request)
+

@@ -1,0 +1,87 @@
+from cm.htmllib import AKForm
+from cm.user import RoleManager, Role
+from cm.html.role.rolelib2 import get_role, RoleDetails, RoleList
+
+
+class RoleForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='role_form')
+        self.add_widget('ak_string', 'name', title=_('Role'),
+                        required=True)
+        self.add_widget('ak_text', 'description', title=_('Description'))
+        
+
+class RoleCreateForm(RoleForm):
+    def __init__(self):
+        RoleForm.__init__(self)
+        self.set_title(_('Create Role'))
+        self.add_submit_button('run', _('Create'))
+
+    def action(self, request, submit, form_data):
+        try:
+            Role().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('%s/seturls' % form_data['name'])
+
+
+class RoleModifyForm(RoleForm):
+    def __init__(self, name):
+        self.name = name
+        data = get_role(name)
+        RoleForm.__init__(self)
+        self.set_title(_('Modify Role Details'))
+        self.set_widgets_value(data)
+        self.set_widget('name', readonly=True)
+        self.add_submit_button('run', _('Modify'))
+
+    def action(self, request, submit, form_data):
+        form_data['name'] = self.name
+        try:
+            Role().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details?tab=info')
+           
+
+class RoleUrlModifyForm(AKForm):
+    def __init__(self, name):
+        self.name = name
+        AKForm.__init__(self)
+        self.set_title(_('Modify Blocked URLs'))
+        self.set_message(_('Check the box to block the URL.')) 
+        
+        rs = Role().get_urls({'name':name})
+        for r in rs:
+            self.add_widget('checkbox', str(r.url_id),
+                            value=r.deny,
+                            title='[%s] %s' % (r.url_id, r.url))
+        
+        self.add_submit_button('run', _('Modify'))
+    
+    def action(self, request, submit, form_data):
+        form_data['name'] = self.name
+        try:
+           Role().set_urls(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details?tab=urls')
+
+
+class RoleDeleteForm(AKForm):
+    def __init__(self, name):
+        self.name = name
+        AKForm.__init__(self)
+        self.set_title(_('Delete Role %s') % name)
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            Role().delete({'name': self.name})
+        except AssertionError:
+            pass
+        return request.redirect('../browse')
+
+

@@ -1,0 +1,225 @@
+from quixote.html import url_quote, html_quote
+from cm import config, error
+from cm.htmllib.internal_renderer import Link
+from urllib import unquote as url_unquote
+from cm.i18n import LangInstance
+
+
+########## THIS CODE IS APP-SPECIFIC, SHOULD NOT IN THE LIBRARY ####
+from cm.html.menu import Menu, Report, Pref, AboutUs
+
+def sidebar [html] (request, url, qstr):
+    mini_sidebar(request, _("What You Can Do"), Menu())
+    mini_sidebar(request, _("Reports"), Report())
+    mini_sidebar(request, _("Your Account"), Pref())
+    oneitem_sidebar(request, _('Search'), '%ssearch' % config.APP_ROOT)
+    oneitem_sidebar(request, _("Help!"), "%shelp?from=%s" % \
+                    (config.APP_ROOT, url), new_win=True)
+    oneitem_sidebar(request, _("Printable Version"), 
+                    url + "?" + add_qstrs(qstr, "format=printable"),
+                    new_win=True)
+    mini_sidebar(request, _("The Developers"), AboutUs())
+##########
+
+
+_javascript = """
+<script language="JavaScript"><!--
+function initFocus() {
+    var de = document.forms["%s"].elements;
+    for (var i=0; i<de.length; i++) {
+        if (((de[i].type == "text") || (de[i].name == "password"))
+            && (de[i].value == "")) {
+            de[i].focus();
+            break;
+        }
+    }
+}
+//--></script>
+"""
+
+def header [html] (request, title='', panels=True, 
+                   focus_form=None):
+    if _is_printable(request):
+        style = '%sprint.css' % config.RES_ROOT
+    else:
+        style = '%sview.css' % config.RES_ROOT  
+    try: 
+        lang = request.session.lang
+    except AttributeError: 
+        #when session is None
+        lang = LangInstance()
+    """
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+    <html lang="%s">
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=%s"/>
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta http-equiv="Cache-Control" content="no-cache"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+    <link title="default style" rel="STYLESHEET" href="%s"
+        type="text/css"/>
+    <title>%s  %s</title>
+    </head>
+    """ % (lang.code, lang.encoding, style, config.WEBPAGE_TITLE, title)
+    
+    if focus_form is not None:
+        global _javascript
+        script = htmltext(_javascript % focus_form)
+        onload = 'onload="initFocus();"'
+    else:
+        script = ''
+        onload = ''
+    '%s<body %s marginwidth="0" marginheight="0">' % (script, onload)
+    
+    if _is_show_panels(panels, request): _panels_header(request)
+
+
+def _is_show_panels(panels, request):
+    if panels and not _is_printable(request):
+        return True
+    return False
+
+def _is_printable(request):
+    if request.get_form_var('format', '') == 'printable':
+        return True
+    return False
+
+def _panels_header [html] (request):
+    # Example: http://akone.dyndns.org/d/error?param=1
+    # SCRIPT_URI returns http://akone.dyndns.org/d/error
+    # QUERY_STRING returns param=1
+    qstr = request.get_environ("QUERY_STRING")
+    url = request.get_environ("SCRIPT_URI")
+     
+    """
+    <table width="100%%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td width="10%%" class="corner">%s</td>
+        <td width="90%%" class="banner">%s</td>
+    </tr>
+    <tr>
+        <td width="10%%" class="sidebar" valign="top">%s</td>
+        <td width="90%%" class="body" valign="top">
+    """ % (logo(), feedback(request, url, qstr), 
+           sidebar(request, url, qstr))
+
+
+def add_url_qstr(*elems):
+    '''Returns a htmltext of URL + query_string.
+    
+    elems - should have 2 portion, a URL, and a query_string.
+    '''
+    return htmltext("?").join([elem for elem in elems if len(elem) > 0])
+
+
+def add_qstrs(*qstrs):
+    '''Returns a htmltext representing the query_string portion of
+    an URL.  (? is not included)
+
+    qstrs - querystring tuple, each element is key=value
+    '''
+    return htmltext("&").join([qstr for qstr in qstrs if len(qstr) > 0])
+
+
+def logo [html] ():
+    '<center>%s</center>' % htmltext(config.LOGO)
+
+
+def feedback [html] (request, url, qstr):
+    url = '%s?%s' % (config.FB_FEEDBACK_URL, 
+                     url_quote(add_url_qstr(url, qstr)))
+    """
+    <center>
+    <table border="0" width="100%%" cellspacing="0" cellpadding="0">
+    <tr><td class="feedbacktext">%s %s</td></tr>
+    </table>
+    </center>""" % (_('Find any bugs or have suggestions?'),
+                    Link(_('Give feedback here'), url, target='_new'))
+
+
+def mini_sidebar [html] (request, title, aList):
+    '<table border="0" width="100%" cellspacing="0" cellpadding="2">'
+    '<tr><td class="mini_sidebar_title">%s</td></tr>' % title
+    current = request.get_environ("SCRIPT_URL")
+    '<tr><td><ul>'
+    for (url, text) in aList:
+        '<li>'
+        if _is_self_or_parent(current, url):
+            style = 'current_link'
+        else:
+            style = 'link'
+        Link(text, url, klass=style)
+        '</li>'
+    '</ul></td></tr>'
+    '</table><br/>'
+
+
+def _is_self_or_parent(cur_url, url):
+    length = len(url)
+    if url == cur_url[0:length]:
+        try:
+            if cur_url[length+1] == '/': # is parent
+                return True
+        except IndexError: # is self; no more characters after cur_url
+            return True
+    return False
+
+
+def oneitem_sidebar [html] (request, text, url, new_win=False):
+    if new_win:
+        target = '_new'
+    else:
+        target = ''
+    """
+    <table border="0" width="100%%" cellspacing="0" cellpadding="2">
+    <tr><td class="oneitem_sidebar">%s</td></tr>   
+    </table><br/>""" % Link(text, url, target=target)
+
+
+def footer [html] (request, panels=True):
+    if _is_show_panels(panels, request): _panels_footer(request)
+    """
+    </body>
+    </html>
+    """
+
+
+def _panels_footer [html] (request):
+    """
+        </td>
+    </tr>
+    </table>
+    """
+
+
+def get_parent_instance_id_from_url(request, parent_klass):
+    '''Returns the instance Id of the parent object.  The instance
+    Id is looked up from the request's URL.
+    
+    request - the quixote.http_request.HTTPRequest object.
+    parent_klass - a string of the name of the parent class.  This
+    name should be in the URL.
+    '''
+    path = request.get_path()
+    a = path.split('/')
+    try:
+        return a[a.index(parent_klass) + 1]
+    except (IndexError, ValueError):
+        raise error.TraversalError
+
+
+def get_instance(instance_method, kw):
+    '''Returns a row of recordset containing an object instance.
+    
+    instance_method - the Object().method().
+    kw - a keyword dictionary to be passed into the instance_method.
+    '''
+    resultsets = instance_method(kw)
+    try:
+        for rs in resultsets:
+            pass
+        return rs
+    except UnboundLocalError:
+        raise error.TraversalError
+    

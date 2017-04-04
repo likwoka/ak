@@ -1,0 +1,115 @@
+from cm.htmllib import AKForm
+from cm.user import UserManager, User, UserStatus, UserRole
+from cm.html.user.userlib2 import get_user, UserDetails, UserList
+from cm.i18n import LanguageManager
+
+
+class UserForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='user_form')
+        self.add_widget('ak_string', 'username', title=_('Username'),
+                        required=True)
+        self.add_widget('ak_string', 'name', title=_('Name'))
+        self.add_widget('ak_string', 'email', title=_('Email'))
+        self.add_widget('ak_text', 'description', title=_('Description'))
+        
+        role = UserRole().descs()
+        self.add_widget('ak_single_select', 'role', title=_('Role'),
+                        allowed_values=role,
+                        descriptions=role,
+                        required=True)
+       
+        langman = LanguageManager()
+        lang_code = langman.get_codes()
+        lang_name = langman.get_names()
+        self.add_widget('ak_single_select', 'lang_code', 
+                        title=_('Language'),
+                        allowed_values=lang_code,
+                        descriptions=lang_name,
+                        required=True)
+
+        status = UserStatus().descs()
+        self.add_widget('ak_single_select', 'status', title=_('Status'),
+                        allowed_values=status,
+                        descriptions=status,
+                        required=True)
+
+
+class UserCreateForm(UserForm):
+    def __init__(self):
+        UserForm.__init__(self)
+        self.set_title(_('Create User'))
+        self.add_submit_button('run', _('Create'))
+    
+    def action(self, request, submit, form_data):
+        try:
+            User().new(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('%s/setpassword' % form_data['username'])    
+
+
+class UserModifyForm(UserForm):
+    def __init__(self, username):
+        self.username = username
+        data = get_user(username)
+        UserForm.__init__(self)
+        self.set_title(_('Modify User Details'))
+        self.set_widgets_value(data)
+        self.set_widget('username', readonly=True)
+        self.add_submit_button('run', _('Modify'))
+        
+    def action(self, request, submit, form_data):
+        form_data['username'] = self.username
+        try:
+            User().set(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+
+
+class UserSetPasswordForm(AKForm):
+    '''For an admin to change a user's password.'''
+    def __init__(self, username):
+        self.username = username
+        AKForm.__init__(self)
+        self.set_title(_('Set User Password'))
+        self.add_widget('ak_password', 'new_password1',
+                        title=_('New Password'), required=True)
+        self.add_widget('ak_password', 'new_password2',
+                        title=_('Confirm your New Password'), required=True)
+        self.add_submit_button('run', _('Save'))
+    
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if form_data['new_password1'] != form_data['new_password2']:
+            self.error['new_password2'] = \
+                _('Your new password entries did not match.')
+        return form_data
+    
+    def action(self, request, submit, form_data):
+        form_data['username'] = self.username
+        try:
+            User().set_password(form_data)
+        except AssertionError:
+            pass
+        return request.redirect('details')
+
+    
+class UserDeleteForm(AKForm):
+    def __init__(self, username):
+        self.username = username
+        AKForm.__init__(self)
+        self.set_title(_('Delete User %s') % username)
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            User().delete({'username': self.username})
+        except AssertionError:
+            pass
+        return request.redirect('../browse')
+
+    

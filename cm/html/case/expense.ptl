@@ -1,0 +1,40 @@
+from cm.htmllib import base
+from cm.html.case.expenselib import ExpenseCreateForm, \
+ExpenseModifyForm, ExpenseDeleteForm
+from cm import error
+
+
+_q_exports = ['create']
+
+
+def create [html] (request):
+    base.header(request, title=_('Add An Expense'))
+    case_id = int(base.get_parent_instance_id_from_url(request, 'case'))
+    ExpenseCreateForm(case_id).handle(request)
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return ExpenseUI(name)
+
+
+class ExpenseUI:
+    _q_exports = ['modify', 'delete']
+
+    def __init__(self, name):
+        try:
+            self.expense_id = int(name)
+        except ValueError:
+            raise error.TraversalError
+
+    def modify [html] (self, request):
+        base.header(request, title=_('Modify An Expense'))
+        ExpenseModifyForm(self.expense_id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete An Expense'))
+        ExpenseDeleteForm(self.expense_id).handle(request)
+        base.footer(request)
+
+
+

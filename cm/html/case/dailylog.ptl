@@ -1,0 +1,48 @@
+from cm.htmllib import base
+from cm.html.case.dailyloglib import DailyLogCreateForm, \
+DailyLogModifyForm, DailyLogDeleteForm, DailyLogDetails
+from cm import error
+
+
+_q_exports = ['create']
+
+
+def create [html] (request):
+    base.header(request, title=_('Add A Log Entry'))
+    case_id = int(base.get_parent_instance_id_from_url(request, 'case'))
+    DailyLogCreateForm(case_id).handle(request)
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return DailyLogUI(name)
+
+
+class DailyLogUI:
+    _q_exports = ['details', 'modify', 'delete']
+
+    def __init__(self, name):
+        try:
+            self.daily_log_id = int(name)
+        except ValueError:
+            raise error.TraversalError
+
+    def _q_index [html] (self, request):
+        self.details(request)
+
+    def details [html] (self, request):
+        base.header(request, title=_('Daily Log Entry'))
+        DailyLogDetails(request, self.daily_log_id)
+        base.footer(request)
+
+    def modify [html] (self, request):
+        base.header(request, title=_('Modify A Log Entry'))
+        DailyLogModifyForm(self.daily_log_id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete A Log Entry'))
+        DailyLogDeleteForm(self.daily_log_id).handle(request)
+        base.footer(request)
+
+
+

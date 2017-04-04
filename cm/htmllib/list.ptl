@@ -1,0 +1,358 @@
+from cm.htmllib.internal_renderer import BaseRenderer
+from urllib import urlencode
+from quixote.html import htmltext
+
+
+def qstr_to_dict(self, request):
+    qstr = request.get_environ('QUERY_STRING')
+    if qstr == '':
+        return {}
+    return dict([pair.split('=') for pair in qstr.split('&')])
+    
+def dict_to_qstr(self, dct):
+    return urlencode(dct)
+
+
+class AKCol:
+    """I am a column header.  Each AKCol must be
+    belonged to a cm.htmllib.renderer.List (for
+    column sorting parameter), set by set_sort_list().
+    """
+    _qstr_to_dict = qstr_to_dict
+    _dict_to_qstr = dict_to_qstr
+    
+    def __init__(self, name, sort_by_name=None):
+        self._name = name
+        self._sort_by = sort_by_name
+        self._sort_list = ''
+    
+    def set_sort_list(self, name):
+        '''Set my parent (cm.htmllib.renderer.List).'''
+        self._sort_list = name
+    
+    def render [html] (self, request):
+        #Prepare the vars() dictionary
+        up_gif = 'up.gif'
+        down_gif = 'down.gif'
+        sb = self._sort_by
+        name = self._name
+        slist = self._sort_list
+        path = request.get_path()
+        sort_order = request.get_form_var('%s_sort_order' % slist)
+
+        #Change the color of the sort arrow from white to yellow
+        if request.get_form_var('%s_sort_by' % slist) == sb:
+            if sort_order == 'up':
+                up_gif = 'current_up.gif'
+            elif sort_order == 'down':
+                down_gif = 'current_down.gif'
+        
+        #Preserve the original querystring, only change the entries
+        #for this column or add to the original querystring.
+        d = self._qstr_to_dict(request)
+        d['%s_sort_by' % slist] = sb
+        d['%s_sort_order' % slist] = 'up'
+        up_qstr = self._dict_to_qstr(d)
+        d['%s_sort_order' % slist] = 'down'
+        down_qstr = self._dict_to_qstr(d)
+
+        #Ok, we are ready to render it now
+        '<td class="list_col_header"><center>'
+        if sb:
+            #This column is sortable
+            """%(name)s<br/>
+            <a href="%(path)s?%(up_qstr)s" title="Sort In Ascending Order">
+            <img src="/resource/%(up_gif)s"/></a>&nbsp;\
+            <a href="%(path)s?%(down_qstr)s" title="Sort In Descending Order">
+            <img src="/resource/%(down_gif)s"/></a>
+            """ % vars()
+        else:
+            #Not a sortable column, just display the column name then
+            name
+        '</center></td>'
+
+
+class List(BaseRenderer):
+    """Use me to present data returned from a cursor that has 
+    more than 1 row.
+    
+    Sample Usage:
+    a = List('score_list', ScoreList().get_list)
+    a.set_columns(('Id', 'score_id'),
+                  ('Name', 'player_name'),
+                  ('Score', 'player_score'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     ..., # Logic for each row is here.
+                     ...,
+                     ...)
+    a.render_footer(request)
+    """
+    _odd_color = 'odd_row'
+    _even_color = 'even_row'
+    
+    def __init__(self, list_name, method, data={}, 
+                 max_rowcount_per_page=20,
+                 allowed_rowcount_per_page=[10, 20, 40]):
+        '''list_name - a string representing this list.  This will
+        be used in paging, sorting columns, and possibly javascript.
+        method - a Object().method() that return a resultset containing
+        the data for this list.
+        data - a dict for passing to the method.  It typically contains
+        {'sort_by': '..', 'sort_order': '..'}.
+        '''
+        BaseRenderer.__init__(self)
+        self._list_name = list_name
+        self._method = method
+        self._data = data
+        self._resultsets = None
+        self._rowcount = None
+        self._row_color = None
+        self._pager = None
+        self._is_pager_on = False
+        self._max_rowcount_per_page = max_rowcount_per_page
+        self._allowed_rowcount_per_page = allowed_rowcount_per_page
+        self._count = 0
+        self._column_header = []
+        
+    def set_columns(self, *cols):
+        '''Set the columns that should be in this list.
+
+        cols - a tuple of tuple of (output_column_name, 
+        sql_column_name).  output_column_name is the name
+        shown in the html output.  If the column has no name,
+        use an empty string instead (ie. ('',)).
+        sql_column_name is the name in sql.  sql_column_name 
+        should only be present if the column is sortable, 
+        otherwise, leave it as empty (ie. ('Amount',)).
+        '''
+        for col in cols:
+            akcol = AKCol(*col)
+            akcol.set_sort_list(self._list_name)
+            self._column_header.append(akcol)
+        self.COLSPAN = len(self._column_header)
+       
+    def _get_resultsets(self, request):
+        sort_by = request.get_form_var('%s_sort_by' % self._list_name)
+        if sort_by:
+            self._data['sort_by'] = sort_by  
+        
+        sort_order = request.get_form_var('%s_sort_order' % self._list_name)
+        if sort_order:
+            self._data['sort_order'] = sort_order
+        
+        self._resultsets = self._method(self._data)
+        self._rowcount =  self._resultsets.rowcount
+        # Turning on the pager automatically if rowcount return is
+        # bigger than the rowcount/page size.
+        if self._rowcount > self._max_rowcount_per_page:
+            self._is_pager_on = True
+            self._pager = Pager(self._list_name, 
+                                self._rowcount,
+                                self._max_rowcount_per_page,
+                                self._allowed_rowcount_per_page)
+   
+    def iter_resultsets(self):
+        '''Returns an iterator of the sql resultset.'''
+        if self._is_pager_on:
+            results = self._resultsets[self._pager.start_at:\
+                                       self._pager.stop_at]
+        else:
+            results = self._resultsets
+        return iter(results)
+
+    def render_header [html] (self, request):
+        '<p>'
+        '<table class="list" cellspacing="0" cellpadding="4">'
+        self._get_resultsets(request)
+        self._render_title(request)
+        self._render_message(request)        
+        if self._is_pager_on:
+            if self._pager is None:
+                self._pager = Pager(self._list_name, 
+                                    self._rowcount,
+                                    self._max_rowcount_per_page,
+                                    self._allowed_rowcount_per_page)
+            self._render_pager(request)
+        '<tr><td><table width="100%%" cellspacing="2" cellpadding="2">'
+        self._render_column_header(request)
+
+    def _render_column_header [html] (self, request):
+        '<tr>'
+        for col in self._column_header:
+            col.render(request)
+        '</tr>'
+
+    def render_row [html] (self, rs, *args):
+        self._count += 1
+        if self._count % 2:
+            self._row_color = self._odd_color
+        else:
+            self._row_color = self._even_color
+
+        '<tr class="%s">' % self._row_color
+        for arg in args:
+            if arg is None:
+                arg = ''
+            '<td>%s</td>' % arg
+        '</tr>'
+
+    def _render_no_data [html] (self, request):
+        if self._rowcount <= 0: 
+            #0 when select returns nothing...
+            #-1 when cursor hasn't done anything 
+            #or rowcount can't be determined
+            """<tr><td colspan="%s" class="no_data"
+            ><center>%s</center></td></tr>
+            """ % (self.COLSPAN, _('No Data Found'))
+
+    def render_footer [html] (self, request):
+        self._render_no_data(request)
+        '</table></td></tr>'
+        if self._is_pager_on:
+            self._render_pager(request)
+        self._render_links(request)
+        '</table>'
+        '</p>'
+    
+    def _render_pager [html] (self, request):
+        '<tr class="pager"><td align="center" colspan="%s">' % self.COLSPAN
+        self._pager.render(request)
+        '</td></tr>'
+
+
+class Pager:
+    '''I separate a very long list into reasonable size lists.
+    I am being used internally by List.
+    
+    Usage:
+    p = Pager(...)
+    p.render(request)
+    ...
+    p.render(request)
+    '''
+    allowed_size = [10, 20, 40]
+    default_size = 20
+    _qstr_to_dict = qstr_to_dict
+    _dict_to_qstr = dict_to_qstr
+    
+    def __init__(self, list_name, rowcount, 
+                 default_size=None, allowed_size=None):
+        '''list_name - a string of the list name
+        rowcount - the rowcount of the List instance.
+        default_size - the default rowcount per page used by 
+        the initial display.
+        allowed_size - a list of allowed rowcount per page.
+        '''
+        self._list_name = list_name
+        self._rowcount = rowcount
+        if default_size is not None:
+            self._default_size = default_size
+        if allowed_size is not None:
+            self.allowed_size = allowed_size
+        self._has_processed = False
+        self.start_at = None
+        self.stop_at = None
+
+    def _process(self, request, rowcount):
+        '''The processing of the pager state according to the
+        request's URL (query string).
+        '''
+        self._page = request.get_form_var('%s_page' % self._list_name, 1)
+        self._pagesize = request.get_form_var('%s_pagesize' % \
+                        self._list_name, self.default_size)
+        try:
+            self._pagesize = int(self._pagesize)
+        except ValueError:
+            self._pagesize = self.default_size
+            
+        if self._pagesize not in self.allowed_size:
+            self._pagesize = self.default_size
+            
+        self._rowcount = rowcount
+        self._set_navbar(request) 
+        self._calculate_range()
+    
+    def _set_navbar(self, request):
+        #Calculate how many pages in total
+        (pages, left_over) = divmod(self._rowcount, self._pagesize)
+        if left_over > 0:
+            pages += 1
+        self._page_total = pages
+        self._left_over = left_over
+        
+        #If the page the user request is out of range, just display page 1
+        self._page = int(self._page)
+        if self._page not in xrange(1, pages + 1):
+            self._page = 1
+
+        #Create the link first, without the querystring and text
+        ahref='<a href="%s?%s">%s</a>' % (request.get_path(), '%s', '%s')
+        page_var = '%s_page' % self._list_name
+        pagesize_var = '%s_pagesize' % self._list_name
+         
+        #Preserve the original querystring, only change the entries
+        #for this column or add to the original querystring.
+        d = self._qstr_to_dict(request)
+
+        #We make a copy of the dict for the size chooser
+        sc = []
+        d[page_var] = 1 #always start at page 1
+        for size in self.allowed_size:
+            if self._pagesize == size:
+                sc.append(str(size)) #no link
+            else:
+                d[pagesize_var] = size
+                sc.append(ahref % (self._dict_to_qstr(d), size))
+        self._size_chooser = '(row per page: ' + ' '.join(sc) + ')'
+        
+        #Now we make the navbar
+        a = []
+        d[pagesize_var] = self._pagesize #all use the current size
+        for i in xrange(1, pages + 1):
+            d[page_var] = i
+            a.append(ahref % (self._dict_to_qstr(d), i)) 
+        
+        #The current page has no link, just text
+        a[self._page - 1] = str(self._page)
+        self._navbar = " ".join(a)
+        
+        #Set the previous page link
+        if self._page > 1:
+            d[page_var] = self._page - 1
+            self._prev_page = ahref % (self._dict_to_qstr(d), '&lt;&lt;')
+        else:
+            self._prev_page = '&nbsp;'
+        
+        #Set the next page link
+        if self._page < pages:
+            d[page_var] = self._page + 1
+            self._next_page = ahref % (self._dict_to_qstr(d), '&gt;&gt;')
+        else:
+            self._next_page = '&nbsp;'
+
+        #Make them into htmltext
+        self._navbar = htmltext(self._navbar)
+        self._prev_page = htmltext(self._prev_page)
+        self._next_page = htmltext(self._next_page)
+        self._size_chooser = htmltext(self._size_chooser)
+ 
+    def _calculate_range(self):
+        self.start_at = (self._page - 1) * self._pagesize
+        
+        if self._rowcount - self.start_at < self._pagesize:
+            self.stop_at = self._rowcount
+        else:
+            self.stop_at = (self._page * self._pagesize)
+
+    def render [html] (self, request):
+        if not self._has_processed:
+            self._process(request, self._rowcount)
+            self._has_processed = True
+        '<table width="%100"><tr>'
+        '<td>%s</td><td>%s</td><td>%s</td><td>%s</td>' % \
+        (self._prev_page, self._navbar, self._size_chooser, self._next_page)
+        '</tr></table>'
+
+        

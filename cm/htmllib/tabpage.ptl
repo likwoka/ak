@@ -1,0 +1,65 @@
+from cm.htmllib.internal_renderer import Link
+
+class Tab:
+    def __init__(self, tab_name, title, func):
+        self.name = tab_name
+        self.title = title
+        self.func = func
+
+
+class TabPage:    
+    def __init__(self):
+        self._tabs = {}
+        self._tabs_order = []
+        self._title = ''
+        
+    def set_title(self, title):
+        self._title = title
+        
+    def add_tab(self, tab_name, title, func, default=False):
+        self._tabs_order.append(tab_name)
+        self._tabs[tab_name] = Tab(tab_name, title, func)
+        if default == True:
+            self._default = tab_name
+
+    def render [html] (self, request, _id):
+        tab = self._get_tab(request)
+        self._render_header(request, tab)
+        tab.func(request, _id)
+        self._render_footer(request)
+
+    def _render_header [html] (self, request, current_tab):
+        '<table cellspacing="0" cellpadding="6">'
+        '<tr><td class="tab_title" colspan="%s">%s</td></tr>' % \
+        (self._get_colspan(), self._title)
+        '<tr>'
+        for tab_name in self._tabs_order:
+            tab = self._tabs[tab_name]
+            if tab.name == current_tab.name:
+                '<td class="current_tab">%s</td>' % tab.title
+            else:
+                '<td class="tab">'
+                Link(tab.title, 
+                     '%s?tab=%s' % (request.get_url(), tab.name), 
+                     title=tab.title)
+                '</td>'
+        '</tr>'
+        '<tr><td class="current_tab" colspan="%s">&nbsp;</td></tr>' \
+        % self._get_colspan()
+        '</table>'
+
+    def _render_footer [html] (self, request):
+        ''
+
+    def _get_tab(self, request):
+        '''Returns a Tab instance according to the
+        request's URL.'''
+        current_tab_name = request.get_form_var('tab', self._default)
+        for tab_name in self._tabs_order:
+            if current_tab_name == tab_name:
+                return self._tabs[tab_name]
+        
+    def _get_colspan(self):
+        return len(self._tabs_order)
+        
+    

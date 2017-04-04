@@ -1,0 +1,62 @@
+from cm.htmllib import base, Message
+
+
+def home [html] (request):
+    base.header(request, title=_('Home'))
+    Intro(request)
+    News(request)
+    base.footer(request)
+
+
+def Intro [html] (request):
+    msg = """
+          <div align="left">
+          <p>The AKONE Case Management System enables loss prevention
+          professionals to record an Incident happened to a Store, open
+          a Case on that Incident for investigation, view reports and
+          analysis on Cases, Incidents and Stores, and do ad-hoc searches
+          on them.</p>
+          <p>Some tips:</p>
+          <ul>
+          <li>You can  suggest improvement or report bugs through
+          the link on the top of every page.</li>
+          <li>In case you are confused, the Help! link on the sidebar
+          should provide helpful pointers to get you through.</li>
+          </ul>
+          </div>
+          """
+    m = Message()
+    m.set_title(_('Intro'))
+    m.set_message(msg)
+    m.render(request)
+
+
+def News [html] (request):
+    m = Message()
+    m.set_title(_('News'))
+    m.set_message(get_news())
+    m.render(request)
+
+
+def get_news [html] ():
+    news = _reload()
+    '<div align="left"><dl>'
+    for (date, desc) in news:
+        """
+        <dt><strong>%s</strong></dt>
+        <dd>%s</dd>
+        &nbsp;
+        """ % (date, desc)
+    '</dl></div>'
+    
+
+def _reload():
+    #This reload allows annoucement.py act like a text file.
+    #We need this because announcement is a global list that lives
+    #inside the interpreter...
+    from cm.model import news
+    reload(news)
+    del news
+    from cm.model import news
+    return news.News
+   

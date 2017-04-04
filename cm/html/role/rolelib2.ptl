@@ -1,0 +1,61 @@
+from cm.user import RoleManager, Role
+from cm.htmllib import base, Grid, List, Link, Pre, TabPage
+
+
+def get_role(name):
+    return base.get_instance(Role().get, {'name':name})
+
+
+def RoleList [html] (request):
+    t = List('roles', RoleManager().get)
+    t.add_link(_('Create A Role'), 'create')
+    t.set_title(_('Roles'))
+    t.set_columns((_('Role'), 'name'),
+                  (_('Description'), 'description'))
+
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.name, '%s/' % rs.name, _('Role Details')),
+                     rs.description)
+    t.render_footer(request)
+
+
+def RoleDetails [html] (request, name):
+    t = TabPage()
+    t.set_title(_('Role %s') % name)
+    t.add_tab('info', _('Role Info'), Info, default=True)
+    t.add_tab('urls', _('Blocked URLs'), UrlList)
+    t.render(request, name)
+
+
+def Info [html] (request, name):
+    d = Grid()
+    data = get_role(name)
+    d.add_item(_('Role'), value=name)
+    d.add_item(_('Description'), value=data.description)
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../')
+    d.render(request)
+
+
+def UrlList [html] (request, name):
+    a = List('urls', Role().get_urls, data={'name':name})
+    a.add_link(_('Modify Blocked URLs'), 'seturls')
+    a.set_columns((_('URL Id'), 'url_id'),
+                  (_('URL'), 'url'),
+                  (_('Blocked'), 'deny'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs,
+                     rs.url_id,
+                     rs.url,
+                     _is_deny(rs.deny))
+    a.render_footer(request)
+
+
+def _is_deny(x):
+    if x is None:
+        return ''
+    return _('Yes')

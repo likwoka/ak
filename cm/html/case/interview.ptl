@@ -1,0 +1,47 @@
+from cm.htmllib import base
+from cm.html.case.interviewlib import InterviewCreateForm, \
+InterviewModifyForm, InterviewDeleteForm, InterviewDetails
+from cm import error
+
+
+_q_exports = ['create']
+
+
+def create [html] (request):
+    base.header(request, title=_('Add An Interview'))
+    case_id = int(base.get_parent_instance_id_from_url(request, 'case'))
+    InterviewCreateForm(case_id).handle(request)
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return InterviewUI(name)
+
+
+class InterviewUI:
+    _q_exports = ['details', 'modify', 'delete']
+
+    def __init__(self, name):
+        try:
+            self.interview_id = int(name)
+        except ValueError:
+            raise error.TraversalError
+
+
+    def _q_index [html] (self, request):
+        self.details(request)
+
+    def details [html] (self, request):
+        base.header(request, title=_('Interview Details'))
+        InterviewDetails(request, self.interview_id)
+        base.footer(request)
+
+    def modify [html] (self, request):
+        base.header(request, title=_('Modify An Interview'))
+        InterviewModifyForm(self.interview_id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete An Interview'))
+        InterviewDeleteForm(self.interview_id).handle(request)
+        base.footer(request)
+

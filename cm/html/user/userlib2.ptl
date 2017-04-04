@@ -1,0 +1,57 @@
+from cm.user import UserManager, User
+from cm.htmllib import base, Grid, List, Link, Pre
+from cm.i18n import Language
+
+
+def get_user(username):
+    return base.get_instance(User().get, {'username':username})
+
+
+def UserList [html] (request):
+    t = List('users', UserManager().get)
+    t.add_link(_('Create A User'), 'create')
+    t.set_title(_('Users'))
+    t.set_columns((_('Username'), 'username'),
+                  (_('Name'), 'name'),
+                  (_('Email'), 'email'),
+                  (_('Description'), 'description'),
+                  (_('Role'), 'role'),
+                  (_('Status'), 'status'))
+
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.username, '%s/' % rs.username, 
+                          _('User Details')),
+                     rs.name,
+                     Link(rs.email, 'mailto:%s' % rs.email, 
+                          _('Send Email To User')),
+                     rs.description,
+                     Link(rs.role, '../role/%s/' % rs.role, 
+                          _('Role Details')),
+                     rs.status)
+    t.render_footer(request)
+
+
+def UserDetails [html] (request, username):
+    data = get_user(username)
+    d = Grid()
+    d.set_title(_('User Details'))
+    d.add_item(_('Username'), value=username)
+    d.add_item(_('Name'), value=data.name)
+    d.add_item(_('Email'), value=Link(data.email, 
+                                   'mailto:%s' % data.email,
+                                   _('Send Email To User')))
+    d.add_item(_('Description'), value=Pre(data.description))
+    d.add_item(_('Role'), value=Link(data.role, 
+                                  '../../role/%s/' % data.role, 
+                                  _('Role Details')))
+    d.add_item(_('Language'), value=Language(data.lang_code).name)
+    d.add_item(_('Status'), value=data.status)
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Change Password'), 'setpassword')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../')
+    d.render(request)
+    
+

@@ -1,0 +1,59 @@
+from cm.config import RES_ROOT
+from cm import filetype
+
+
+class FileType:
+    '''I am a custom mapping of content-type and thumbnail pictures.'''
+    mapping = [('audio' , 'audio.gif'),
+               ('audio/x-pn-realaudio', 'rm.gif'),
+               ('video', 'video.gif'),
+               ('image', 'image.gif'),
+               ('image/gif', 'gif.gif'),
+               ('image/jpeg', 'jpeg.gif'),
+               ('image/tiff', 'tiff.gif'),
+               ('application/ms-access', 'msaccess.gif'),
+               ('application/vnd.ms-excel', 'msexcel.gif'),
+               ('application/vnd.ms-powerpoint', 'msppt.gif'),
+               ('application/vnd.ms-project', 'msproj.gif'),
+               ('', 'msrtf.gif'),
+               ('application/msword', 'msword.gif'),
+               ('application/vnd.visio', 'visio.gif'),
+               ('application/wordperfect5.1', 'wordpfct.gif'),
+               ('', 'sowriter.gif'),
+               ('', 'sodraw.gif'),
+               ('', 'somath.gif'),
+               ('', 'soimpress.gif'),
+               ('', 'socalc.gif'),
+               ('text/plain', 'text.gif'),
+               ('text/x-tex', 'tex.gif'),
+               ('', 'vcal.gif'),
+               ('application/pdf', 'pdf.gif'),
+               ('application/postscript', 'ps.gif'),
+               ('application/zip', 'zip.gif'),
+               ('unknown', 'unknown.gif')]
+                   
+    def get_type(self, path):
+        '''Returns a string of the content-type of the file by
+        guessing from the file extension.
+        '''
+        return filetype.guess_file_type(path)
+
+    def get_html(self, filetype):
+        '''Returns a htmltext of the thumbnail html code. '''
+        return htmltext('<img src="%s%s"/>%s' % \
+               (RES_ROOT, self.get_image(filetype), filetype))
+
+    def get_image(self, filetype):
+        '''Returns the thumbnail file name (no path).'''
+        result = [v for k, v in self.mapping if filetype == k]
+        if result == []:
+            maintype = filetype.split('/')[0]
+            result = [v for k, v in self.mapping if maintype == k]
+            if result == []:
+                result = 'unknown.gif'
+            else:
+                result = result[0]
+        else:
+            result = result[0]
+        return result
+        

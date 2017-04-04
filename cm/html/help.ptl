@@ -1,0 +1,19 @@
+from cm.htmllib import base
+
+
+def help [html] (request):
+    base.header(request, title=_('Help!'), panels=False)
+    """
+    <center>
+    <h3>Context Sensitive Help</h3>
+    <p>The AKONE system is designed with ease of use in mind,
+    every function should be intuitive to use.</p>
+    <p>In case further explanation is needed, this popup 
+    page can provide helpful pointers to the intented usage.</p>
+    <p>If this page does not help you, please tell us through
+    the feedback link on top of that page.
+    </center>
+    """
+    base.footer(request, panels=False)
+
+

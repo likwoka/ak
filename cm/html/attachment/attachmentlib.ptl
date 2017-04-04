@@ -1,0 +1,237 @@
+from cm.htmllib import AKForm, Message
+from cm.model.attachment import AttachmentManager, Attachment
+from cm.html.attachment.attachmentlib2 import get_attachment, AttachmentList, \
+AttachmentDetails
+from cm import error
+from cm.config import APP_ROOT
+
+
+class AttachForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self, name='attachment_form', enctype=AKForm.UPLOAD)
+        self.add_widget('ak_file', 'attachment', 
+                        title=_('Attachment'), required=True)
+        self.add_widget('ak_text', 'description', title=_('Description'))
+
+class CreateForm(AttachForm):
+    def __init__(self):
+        AttachForm.__init__(self)
+        self.set_title(_('Upload An Attachment'))
+        self.add_widget('hidden', 'case_id')
+        self.add_widget('hidden', 'incident_id')
+        self.add_submit_button('run', _('Upload'))
+
+    def action(self, request, submit, form_data):
+        upload = form_data['attachment']
+        a = Attachment()
+        if a.has_uploaded(upload):
+            _id = a.get_id()
+            kw = {}
+            kw['attachment_id'] = _id
+            kw['owner'] = request.session.user
+            kw['description'] = form_data['description']
+            kw['upload'] = upload
+            try:
+                a.new(kw)
+            except AssertionError:
+                pass
+            
+            # do 'attach' operation
+            kw2 = {}
+            kw2['attachment_id'] = _id
+            if form_data.get('incident_id') is not None:
+                kw2['incident_id'] = form_data['incident_id']
+                try:
+                    a.attach_to_incident(kw2)
+                except AssertionError:
+                    pass
+            elif form_data.get('case_id') is not None:
+                kw2['case_id'] = form_data['case_id']
+                try:
+                    a.attach_to_case(kw2)
+                except AssertionError:
+                    pass
+                
+            request.redirect('%s/' % _id)
+        else:
+            return AttachMessage(request, 
+                                 _('You have not uploaded anything.'), 
+                                 'browse')
+
+
+class ModifyForm(AttachForm):
+    def __init__(self, attachment_id):
+        self._id = attachment_id
+        data = get_attachment(attachment_id)
+        AttachForm.__init__(self)
+        self.set_title(_('Modify Attachment Description'))
+        self.set_widget('description', value=data.description)
+        self.remove_widget('attachment')
+        self.add_submit_button('run', 'Submit')
+
+    def action(self, request, submit, form_data):
+        form_data['attachment_id'] =self._id
+        try:
+            Attachment().set(form_data)
+        except AssertionError:
+            pass
+        request.redirect('details')
+
+
+class ReplaceForm(AttachForm):
+    def __init__(self, attachment_id):
+        self._id = attachment_id
+        AttachForm.__init__(self)
+        self.set_title(_('Replace A File'))
+        self.remove_widget('description')
+        self.add_submit_button('run', _('Upload'))
+
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if not form_data['attachment']:
+            self.error['attachment'] = _('You must supply a file.')
+        return form_data
+
+    def action(self, request, submit, form_data):
+        upload = form_data['attachment']
+        a = Attachment()    
+        if a.has_uploaded(upload):
+            kw = {}
+            kw['attachment_id'] = self._id
+            kw['upload'] = upload
+            try:
+                Attachment().set(kw)
+            except AssertionError:
+                pass
+            request.redirect('details')
+        else:
+            return AttachMessage(request, 
+                                 _('You have not uploaded anything.'), 
+                                 'details')
+
+
+class DeleteForm(AKForm):
+    def __init__(self, attachment_id):
+        self._id = attachment_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Attachment'))
+        self.set_message(_('Are you sure?')) 
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            Attachment().delete({'attachment_id':self._id})
+        except AssertionError:
+            pass
+        return request.redirect('../browse')
+
+
+class DetachForm(AKForm):
+    def __init__(self, attachment_id):
+        self.attachment_id = attachment_id
+        AKForm.__init__(self)
+        self.set_title(_('Detach Attachment'))
+        self.add_widget('checkbox', 'delete', 
+                        title=_('Delete the attachment'))
+        self.add_widget('hidden', 'case_id')
+        self.add_widget('hidden', 'incident_id')
+        self.set_message(_('Are you sure?'))
+        self.add_submit_button('run', _('Detach'))
+
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if form_data.get('case_id') is None \
+            and form_data.get('incident_id') is None:
+            raise _('Nothing to detach from.')
+        return form_data
+
+    def action(self, request, submit, form_data):
+        form_data['attachment_id'] = self.attachment_id
+        a = Attachment()
+        
+        if form_data.get('case_id') is not None:
+            try:
+                a.detach_from_case(form_data)
+            except AssertionError:
+                pass
+            addr = '%scase/%s/?tab=attachment' % \
+                   (APP_ROOT, form_data['case_id'])
+        
+        elif form_data.get('incident_id') is not None:
+            try:
+                a.detach_from_incident(form_data)
+            except AssertionError:
+                pass
+            addr = '%sincident/%s/?tab=attachment' % \
+                   (APP_ROOT, form_data['incident_id'])
+        
+        if form_data.get('delete'):
+            try:
+                a.delete({'attachment_id':self.attachment_id})
+            except AssertionError:
+                pass
+                
+        return request.redirect(addr)
+
+
+class AttachToForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self)
+        self.set_title(_('Attach An Attachment'))
+        self.add_widget('hidden', 'case_id')
+        self.add_widget('hidden', 'incident_id')
+       
+        a_desc = []
+        a_val = []
+        as = AttachmentManager().get({'sort_by':'attachment_id'})
+        for a in as:
+            a_val.append(a.attachment_id)
+            a_desc.append('%s - %s - %s' % (a.attachment_id, 
+                          a.filename, a.description))
+        if len(a_val) > 0:
+            self.add_widget('ak_single_select', 'attachment_id', 
+                            title=_('Attachment'),
+                            allowed_values=a_val,
+                            descriptions=a_desc,
+                            required=True)
+            self.add_submit_button('run', _('Attach'))
+        else:
+            self.set_message(_('No attachment found.'))
+            
+    def process(self, request):
+        form_data = AKForm.process(self, request)
+        if form_data.get('case_id') is None \
+            and form_data.get('incident_id') is None:
+            raise error.NotEnoughDataError(_('Nothing to attach to.'))
+        return form_data
+    
+    def action(self, request, submit, form_data):
+        a = Attachment()
+        if form_data.get('case_id') is not None:
+            try:
+                a.attach_to_case(form_data)
+            except AssertionError:
+                pass
+            addr = '%scase/%s/?tab=attachment' % \
+                   (APP_ROOT, form_data['case_id'])
+
+        elif form_data.get('incident_id') is not None:
+            try:
+                a.attach_to_incident(form_data)
+            except AssertionError:
+                pass
+            addr = '%sincident/%s/?tab=attachment' % \
+                   (APP_ROOT, form_data['incident_id'])
+
+        return request.redirect(addr)
+
+        
+def AttachMessage [html] (request, message, link_url):
+    m = Message()
+    m.set_title(_('Upload An Attachment'))
+    m.set_message(message)
+    m.add_link(_('Go Up'), link_url)
+    m.render(request)
+        
+                

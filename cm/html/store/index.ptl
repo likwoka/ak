@@ -1,0 +1,182 @@
+from cm.htmllib import base, Grid, List, Link, AKForm, Message
+from cm.model.store import StoreManager, Store
+from cm.config import RES_ROOT
+from cm import error
+
+
+def _q_index [html] (request):
+    browse(request)
+
+def browse [html] (request):
+    base.header(request, title=_('Browse Stores'))
+    StoreList(request)
+    base.footer(request)
+
+def create [html] (request):
+    base.header(request, title=_('Create A Store'))
+    CreateForm().handle(request)
+    base.footer(request)
+
+def _q_lookup(request, name):
+    return StoreUI(name)
+
+
+class StoreUI:
+    _q_exports = ['details', 'modify', 'delete']
+
+    def __init__(self, name):
+        try:
+            self.store_id = name
+        except ValueError:
+            raise error.TraversalError
+
+    def _q_index [html] (self, request):
+        self.details(request)
+        
+    def details [html] (self, request):
+        base.header(request, title=_('Store Details'))
+        StoreDetails(request, self.store_id)
+        base.footer(request)
+
+    def modify [html] (self, request):
+        base.header(request, title=_('Modify A Store'))
+        ModifyForm(self.store_id).handle(request)
+        base.footer(request)
+
+    def delete [html] (self, request):
+        base.header(request, title=_('Delete A Store')) 
+        DeleteForm(self.store_id).handle(request)  
+        base.footer(request)
+    
+    
+def get_store(store_id):
+    return base.get_instance(Store().get, {'store_id':store_id})
+
+
+def StoreList [html] (request):
+    t = List('stores', StoreManager().get)
+    t.add_link(_('Add A Store'), 'create')
+    t.set_title(_('Stores'))
+    t.set_columns((_('Store Id'), 'store_id'),
+                  (_('Location'), 'location'),
+                  ('',))
+    
+    t.render_header(request)
+    for rs in t.iter_resultsets():
+        t.render_row(rs,
+                     Link(rs.store_id, '%s/' % rs.store_id, 
+                          _('Store Details')),
+                     rs.location,
+                     Link(str('<img src="%sdelete.gif">') % RES_ROOT,
+                          '%s/delete' % rs.store_id,
+                          _('Delete Store')))
+    t.render_footer(request)
+
+
+def StoreDetails [html] (request, store_id):
+    data = get_store(store_id)
+    d = Grid()
+    d.set_title(_('Store Details'))
+    d.add_item(_('Store Id'), store_id)
+    d.add_item(_('Location'), data.location)
+    d.add_item(_('Security'), data.security)
+    d.add_item(_('Key Holder Access'), data.key_holder_access)
+    d.add_item(_('Protection System'), data.protection_system)
+    d.add_link(_('Modify'), 'modify')
+    d.add_link(_('Delete'), 'delete')
+    d.add_link(_('Go Up'), '../')
+    d.render(request)
+
+    a = List('il', Store().get_incidents, {'store_id':store_id})
+    a.set_title(_('Store Incidents'))
+    a.set_columns((_('Incident Id'), 'incident_id'),
+                  (_('Description'), 'description'),
+                  (_('Status'), 'status'))
+    a.render_header(request)
+    for rs in a.iter_resultsets():
+        a.render_row(rs, 
+                     Link(rs.incident_id, 
+                          '../../incident/%s/' % rs.incident_id),
+                     rs.description,
+                     rs.status)
+    a.render_footer(request)    
+
+
+class StoreForm(AKForm):
+    def __init__(self):
+        AKForm.__init__(self)
+        self.add_widget('ak_int', 'store_id', title=_('Store Id'), 
+                        required=True)
+        self.add_widget('ak_string', 'location', title=_('Location'), 
+                        required=True)
+        self.add_widget('ak_string', 'security', title=_('Security'))
+        self.add_widget('ak_string', 'key_holder_access', 
+                        title=_('Key Holder Access'))
+        self.add_widget('ak_string', 'protection_system', 
+                        title=_('Protection System'))
+
+        
+class CreateForm(StoreForm):
+    def __init__(self):
+        StoreForm.__init__(self)
+        self.set_title(_('Create Store'))
+        self.add_submit_button('run', _('Create'))
+
+    def action(self, request, submit, form_data):
+        try:
+            form_data['owner'] = request.session.user
+            Store().new(form_data)
+        except error.ProgrammingError:
+            message = _('There is another store with Store ' \
+                        'Id %(store_id)s.  Please choose another '\
+                        'Store Id.' % form_data) 
+            m = Message()
+            m.set_title(_('Error'))
+            m.set_message(message)
+            return m.render(request)
+        return request.redirect('%s/' % form_data['store_id'])
+                
+
+class ModifyForm(StoreForm):
+    def __init__(self, store_id):
+        self.store_id = store_id
+        data = get_store(store_id)
+        
+        StoreForm.__init__(self)
+        self.set_title(_('Modify Store'))
+        self.set_widgets_value(data)
+        self.set_widget('store_id', readonly=True)
+        self.add_submit_button('run', _('Modify'))
+
+    def action(self, request, submit, form_data):
+        form_data['store_id'] = self.store_id
+        try:
+            Store().set(form_data)
+        except AssertionError: #XXX
+            pass
+        return request.redirect('details') 
+    
+    
+class DeleteForm(AKForm):
+    def __init__(self, store_id):
+        self.store_id = store_id
+        AKForm.__init__(self)
+        self.set_title(_('Delete Store %s') % store_id)
+        self.set_message(_('Are you sure?')) 
+        self.add_submit_button('run', _('Delete'))
+        self.add_cancel_button(_('Cancel'), 'details')
+
+    def action(self, request, submit, form_data):
+        try:
+            Store().delete({'store_id':self.store_id})
+        except error.ProgrammingError:
+            # MOST LIKELY violation of referential intergrity
+            message = _('This store cannot be deleted since ' \
+                        'it still has incidents.  Please delete ' \
+                        'the related incidents first.') 
+            m = Message()
+            m.set_title(_('Error'))
+            m.set_message(message)
+            return m.render(request)
+        return request.redirect('../browse')
+
